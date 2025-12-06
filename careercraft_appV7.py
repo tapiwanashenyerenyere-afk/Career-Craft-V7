@@ -1,1396 +1,913 @@
-"""
-CareerCraft V7.1 - Streamlit Application
-
-Moat & Design:
-- Not "just a form" and not "ask an AI what to do with my life".
-- Tool you use BEFORE talking to a mentor/friend/counsellor.
-- Direction (6–12 months) → Phase (3 months) → Sprint (4 weeks).
-- Quantified: skills, match, salary range, uplift estimate, readiness.
-- AI Career Coach as pre-conversation layer (values, constraints, language).
-- Local actions: courses, events, communities pulled into the sprint.
-- Data collected for learning (JSON files) + simple admin analytics.
-"""
-
 import streamlit as st
-import json
-import uuid
-from datetime import datetime, timedelta
-from pathlib import Path
 import pandas as pd
+import numpy as np
+import json
+import os
+from datetime import datetime
 
-# Optional: Anthropic for AI Coach
-try:
-    from anthropic import Anthropic
-    ANTHROPIC_AVAILABLE = True
-except ImportError:
-    ANTHROPIC_AVAILABLE = False
+import anthropic
+from openai import OpenAI
 
-# =============================================================================
-# CONFIGURATION
-# =============================================================================
+# -------------------------
+# PAGE CONFIG & GLOBAL STYLE
+# -------------------------
 
 st.set_page_config(
-    page_title="CareerCraft - CareerChecks for clearer decisions",
-    page_icon="🧭",
+    page_title="CareerCraft – CareerCheck",
+    page_icon="✨",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="collapsed",
 )
 
-DATA_DIR = Path("careercraft_data")
-DATA_DIR.mkdir(exist_ok=True)
-
-# =============================================================================
-# DATA DEFINITIONS
-# =============================================================================
-
-SKILL_GROUPS = {
-    "cognitive": {
-        "name": "Thinking",
-        "icon": "🧠",
-        "skills": ["Problem Solving", "Systems Thinking", "Critical Analysis", "Research"]
-    },
-    "technical": {
-        "name": "Technical",
-        "icon": "⚙️",
-        "skills": ["Programming", "Data Analysis", "Design", "Tools"]
-    },
-    "people": {
-        "name": "People",
-        "icon": "💬",
-        "skills": ["Communication", "Leadership", "Mentoring", "Collaboration"]
-    },
-    "execution": {
-        "name": "Delivery",
-        "icon": "🚀",
-        "skills": ["Project Management", "Sales", "Operations", "Process Design"]
+# Global CSS: white product feel, centred content
+st.markdown(
+    """
+    <style>
+    body {
+        background-color: #f5f7fb;
+        color: #0f172a;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
-}
-
-SKILL_LEVELS = [
-    {"label": "Never", "value": 10},
-    {"label": "Learning", "value": 35},
-    {"label": "Sometimes", "value": 60},
-    {"label": "Weekly", "value": 90}
-]
-
-CAREERS = [
-    {"id": "software-dev", "title": "Software Developer", "icon": "💻", "median": 132270, "p10": 79000, "p90": 198000, "growth": 25, "category": "Tech", "skills": ["Programming", "Problem Solving", "Systems Thinking"]},
-    {"id": "data-scientist", "title": "Data Scientist", "icon": "📊", "median": 108020, "p10": 63000, "p90": 184000, "growth": 36, "category": "Tech", "skills": ["Data Analysis", "Programming", "Research"]},
-    {"id": "product-manager", "title": "Product Manager", "icon": "🎯", "median": 149000, "p10": 95000, "p90": 215000, "growth": 8, "category": "Tech", "skills": ["Communication", "Problem Solving", "Leadership"]},
-    {"id": "data-analyst", "title": "Data Analyst", "icon": "📉", "median": 82640, "p10": 50000, "p90": 127000, "growth": 23, "category": "Tech", "skills": ["Data Analysis", "Communication", "Tools"]},
-    {"id": "ux-designer", "title": "UX Designer", "icon": "🎨", "median": 97990, "p10": 58000, "p90": 155000, "growth": 16, "category": "Tech", "skills": ["Design", "Research", "Communication"]},
-    {"id": "cybersecurity", "title": "Cybersecurity", "icon": "🔐", "median": 120360, "p10": 72000, "p90": 182000, "growth": 33, "category": "Tech", "skills": ["Systems Thinking", "Problem Solving", "Tools"]},
-    {"id": "marketing-manager", "title": "Marketing Manager", "icon": "📈", "median": 140040, "p10": 78000, "p90": 208000, "growth": 6, "category": "Business", "skills": ["Communication", "Data Analysis", "Leadership"]},
-    {"id": "consultant", "title": "Consultant", "icon": "🎩", "median": 99410, "p10": 57000, "p90": 167000, "growth": 10, "category": "Business", "skills": ["Problem Solving", "Communication", "Critical Analysis"]},
-    {"id": "project-manager", "title": "Project Manager", "icon": "📋", "median": 95370, "p10": 57000, "p90": 159000, "growth": 6, "category": "Business", "skills": ["Project Management", "Communication", "Leadership"]},
-    {"id": "business-analyst", "title": "Business Analyst", "icon": "💼", "median": 99410, "p10": 57000, "p90": 167000, "growth": 9, "category": "Business", "skills": ["Critical Analysis", "Communication", "Process Design"]},
-    {"id": "nurse", "title": "Registered Nurse", "icon": "👩‍⚕️", "median": 86070, "p10": 63000, "p90": 129000, "growth": 6, "category": "Healthcare", "skills": ["Communication", "Problem Solving", "Collaboration"]},
-    {"id": "health-admin", "title": "Health Admin", "icon": "🏥", "median": 110680, "p10": 64000, "p90": 209000, "growth": 28, "category": "Healthcare", "skills": ["Leadership", "Operations", "Communication"]},
-    {"id": "teacher", "title": "Teacher/Trainer", "icon": "📚", "median": 61690, "p10": 42000, "p90": 99000, "growth": 1, "category": "Education", "skills": ["Communication", "Mentoring", "Research"]},
-    {"id": "content-creator", "title": "Content Creator", "icon": "📱", "median": 62500, "p10": 35000, "p90": 120000, "growth": 12, "category": "Creative", "skills": ["Communication", "Design", "Research"]},
-]
-
-PHASE_TEMPLATES = {
-    "Ready": {
-        "name": "Activation & Visibility",
-        "goal": "Make your move visible and start building track record in your target role."
-    },
-    "Stretch": {
-        "name": "Exploration & Foundations",
-        "goal": "Understand the work, build basic skills, and test if this direction feels right."
-    },
-    "Long-shot": {
-        "name": "Discovery & Skill Building",
-        "goal": "Learn what this path requires and start closing your biggest skill gaps."
+    .main .block-container {
+        padding-top: 2.5rem;
+        padding-bottom: 3.5rem;
+        max-width: 1100px;
     }
-}
-
-OPPORTUNITIES = {
-    "courses": [
-        {"id": "course_ga_pm", "title": "Intro to Product Management", "provider": "General Assembly", "duration": "4 weeks", "mode": "Online", "cost": "$650", "tags": ["product-manager", "business-analyst"]},
-        {"id": "course_google_da", "title": "Google Data Analytics", "provider": "Coursera", "duration": "6 months", "mode": "Online", "cost": "$39/mo", "tags": ["data-analyst", "data-scientist"]},
-        {"id": "course_tafe_analytics", "title": "Data Analytics for Non-Analysts", "provider": "Local TAFE", "duration": "6 weeks", "mode": "Evenings", "cost": "$400", "tags": ["data-analyst", "business-analyst"]},
-        {"id": "course_ux_google", "title": "Google UX Design Certificate", "provider": "Coursera", "duration": "6 months", "mode": "Online", "cost": "$39/mo", "tags": ["ux-designer"]},
-        {"id": "course_leadership", "title": "Leading People & Teams", "provider": "Michigan", "duration": "5 months", "mode": "Online", "cost": "$49/mo", "tags": ["product-manager", "project-manager", "marketing-manager"]},
-    ],
-    "events": [
-        {"id": "event_pm_meetup", "title": "Product Meetup – PMs in Tech", "provider": "Meetup", "date": "Mar 27", "time": "6:00–8:30pm", "mode": "In person", "tags": ["product-manager"]},
-        {"id": "event_data_panel", "title": "Careers in Data & Product", "provider": "Uni Careers", "date": "Next Thursday", "time": "12:00pm", "mode": "Online", "tags": ["data-analyst", "data-scientist", "product-manager"]},
-        {"id": "event_ux_workshop", "title": "UX Portfolio Workshop", "provider": "General Assembly", "date": "Feb 20", "time": "6:00pm", "mode": "Hybrid", "tags": ["ux-designer"]},
-        {"id": "event_tech_networking", "title": "Tech Networking Night", "provider": "StartupVic", "date": "Mar 15", "time": "5:30pm", "mode": "In person", "tags": ["software-dev", "data-scientist", "product-manager"]},
-    ],
-    "communities": [
-        {"id": "comm_african_tech", "title": "African Tech & Product Melbourne", "provider": "Meetup", "frequency": "Monthly", "mode": "Hybrid", "tags": ["product-manager", "software-dev"]},
-        {"id": "comm_early_analytics", "title": "Early Careers in Analytics", "provider": "Discord", "frequency": "Always on", "mode": "Online", "tags": ["data-analyst", "data-scientist"]},
-        {"id": "comm_women_tech", "title": "Women in Tech Melbourne", "provider": "Slack", "frequency": "Weekly events", "mode": "Hybrid", "tags": ["software-dev", "ux-designer", "product-manager"]},
-        {"id": "comm_pm_circle", "title": "Product Manager Circle", "provider": "LinkedIn", "frequency": "Bi-weekly", "mode": "Online", "tags": ["product-manager"]},
-    ]
-}
-
-# =============================================================================
-# CUSTOM CSS
-# =============================================================================
-
-st.markdown("""
-<style>
-    /* Global app background */
-    .stApp {
-        background-color: #f9fafb;
-    }
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-
-    /* Hero card like ScoreApp / Airwallex */
     .hero-card {
         background: #ffffff;
         border-radius: 24px;
-        padding: 2.5rem 2rem;
-        box-shadow: 0 32px 80px rgba(15,23,42,0.08);
-        border: 1px solid #e5e7eb;
-        margin-bottom: 2rem;
+        padding: 28px 32px 26px 32px;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.07);
+        border: 1px solid rgba(148, 163, 184, 0.28);
     }
-    .hero-badge {
+    .badge-pill {
         display: inline-flex;
         align-items: center;
-        gap: 0.4rem;
-        font-size: 0.8rem;
-        font-weight: 500;
-        color: #4b5563;
-        padding: 0.4rem 0.9rem;
+        gap: 0.35rem;
+        padding: 0.28rem 0.78rem;
         border-radius: 999px;
-        background: #eef2ff;
-        border: 1px solid #c7d2fe;
-        margin-bottom: 0.9rem;
+        font-size: 0.78rem;
+        font-weight: 500;
+        background: #ecfdf5;
+        color: #16a34a;
+        border: 1px solid rgba(22, 163, 74, 0.18);
+    }
+    .pill-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: #22c55e;
+        box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.45);
     }
     .hero-title {
-        font-size: 2.5rem;
-        line-height: 1.1;
+        font-size: 2.1rem;
+        line-height: 1.15;
         font-weight: 800;
-        color: #111827;
-        margin-bottom: 0.75rem;
+        letter-spacing: -0.03em;
+        margin-top: 0.8rem;
+        margin-bottom: 0.65rem;
+        color: #020617;
     }
-    .hero-subtitle {
-        font-size: 1.1rem;
+    .hero-sub {
+        font-size: 0.99rem;
+        line-height: 1.55;
         color: #4b5563;
-        max-width: 44rem;
-        margin-bottom: 1.2rem;
     }
-    .hero-subsubtitle {
-        font-size: 0.9rem;
+    .hero-grid {
+        margin-top: 1.6rem;
+        display: grid;
+        grid-template-columns: 1.3fr 1fr 1fr;
+        gap: 1.2rem;
+    }
+    .hero-pill-col-title {
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
         color: #6b7280;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.35rem;
+        font-weight: 600;
     }
-    .hero-meta {
+    .hero-pill-col-body {
+        font-size: 0.9rem;
+        line-height: 1.45;
+        color: #111827;
+    }
+    .hero-footnote {
         font-size: 0.8rem;
         color: #9ca3af;
+        margin-top: 0.9rem;
     }
-
-    .card {
-        background: white;
-        border-radius: 16px;
-        padding: 1.5rem;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        border: 1px solid rgba(0,0,0,0.04);
-        margin-bottom: 1rem;
-    }
-
-    .card-purple {
-        background: linear-gradient(135deg, #f5f3ff, #ede9fe);
-        border: 1px solid #c4b5fd;
-        padding: 1rem;
-        border-radius: 12px;
-    }
-
-    .card-blue {
-        background: linear-gradient(135deg, #eff6ff, #dbeafe);
-        border: 1px solid #93c5fd;
-        padding: 1rem;
-        border-radius: 12px;
-    }
-
-    .card-green {
-        background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-        border: 1px solid #86efac;
-        padding: 1rem;
-        border-radius: 12px;
-    }
-
-    .hero-gradient {
-        background: linear-gradient(135deg, #6366f1 0%, #7c3aed 50%, #f97316 100%);
-        padding: 3rem 2rem;
-        border-radius: 20px;
-        color: white;
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-    .hero-gradient h1 {
-        font-size: 2.3rem;
-        font-weight: 800;
-        margin-bottom: 0.5rem;
-    }
-
-    .chat-assistant {
-        background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 18px;
-        padding: 12px 16px;
-        margin: 8px 0;
-        max-width: 85%;
-    }
-
-    .chat-user {
-        background: linear-gradient(135deg, #6366f1, #7c3aed);
-        color: white;
-        border-radius: 18px;
-        padding: 12px 16px;
-        margin: 8px 0;
-        max-width: 85%;
-        margin-left: auto;
-        text-align: right;
-    }
-
-    .progress-bar {
-        height: 8px;
-        background: #e5e7eb;
-        border-radius: 4px;
-        overflow: hidden;
-    }
-
-    .progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #6366f1, #f97316);
-        border-radius: 4px;
-        transition: width 0.5s;
-    }
-
-    .stat-card {
-        background: rgba(255,255,255,0.85);
-        backdrop-filter: blur(10px);
-        border-radius: 12px;
-        padding: 1rem;
-        text-align: center;
-        display: inline-block;
-        margin: 0.5rem;
-        min-width: 120px;
-        border: 1px solid rgba(255,255,255,0.6);
-    }
-
-    .stat-value {
-        font-size: 1.4rem;
-        font-weight: 700;
-    }
-
-    .stat-label {
-        font-size: 0.8rem;
-        opacity: 0.9;
-    }
-
-    .section-label {
-        font-size: 0.75rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-    }
-    .section-label-purple { color: #7c3aed; }
-    .section-label-blue { color: #2563eb; }
-    .section-label-green { color: #16a34a; }
-
-    /* Stepper */
-    .stepper {
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-        font-size: 0.75rem;
-        margin: 0.3rem 0 1.1rem 0;
-        color: #6b7280;
-        flex-wrap: wrap;
-    }
-    .step-circle {
-        width: 22px;
-        height: 22px;
-        border-radius: 999px;
-        border: 1px solid #e5e7eb;
-        display: flex;
+    .cc-primary-btn {
+        display: inline-flex;
         align-items: center;
         justify-content: center;
+        padding: 0.7rem 1.4rem;
+        border-radius: 999px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        background: linear-gradient(135deg, #f97316, #ec4899);
+        color: white !important;
+        box-shadow: 0 16px 30px rgba(236, 72, 153, 0.35);
+        font-size: 0.95rem;
+    }
+    .cc-primary-btn span {
+        margin-left: 0.4rem;
+    }
+    .cc-secondary-text {
+        font-size: 0.82rem;
+        color: #6b7280;
+        margin-top: 0.45rem;
+    }
+    .entry-row {
+        margin-top: 2.1rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.3rem;
+    }
+    .entry-card {
+        background: #020617;
+        color: #e5e7eb;
+        border-radius: 16px;
+        padding: 1rem 1.3rem 1.1rem 1.3rem;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.55);
+        position: relative;
+        overflow: hidden;
+    }
+    .entry-pill-label {
         font-size: 0.75rem;
-        background: #ffffff;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: #9ca3af;
+        margin-bottom: 0.25rem;
     }
-    .step-circle-active {
-        border-color: #4f46e5;
-        background: #4f46e5;
-        color: #ffffff;
+    .entry-title {
+        font-size: 1.02rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
     }
-    .step-circle-done {
-        border-color: #22c55e;
-        background: #22c55e;
-        color: #ffffff;
+    .entry-body {
+        font-size: 0.86rem;
+        color: #e5e7eb;
+        opacity: 0.9;
+        margin-bottom: 0.65rem;
     }
-    .step-label {
+    .entry-cta {
+        font-size: 0.82rem;
+        color: #f97316;
         font-weight: 500;
-        color: #374151;
     }
-</style>
-""", unsafe_allow_html=True)
-
-# =============================================================================
-# SESSION STATE INITIALIZATION
-# =============================================================================
-
-def init_session_state():
-    if "session_id" not in st.session_state:
-        st.session_state.session_id = f"cc_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
-
-    defaults = {
-        "screen": "landing",
-        "lens": None,
-        "skills": {},
-        "exploring": [],
-        "selected_career": None,
-        "active_tab": "overview",
-        "chat_messages": [],
-        "values": {"priorities": [], "constraints": [], "raw_responses": []},
-        "coach_summary": {
-            "direction_6_12m": "",
-            "phase_3m": {"name": "", "goal": ""},
-            "sprint_4w": {"title": "", "rationale": "", "actions": []},
-            "vision_12m": "",
-            "check_in_date": (datetime.now() + timedelta(days=28)).strftime("%Y-%m-%d")
-        },
-        "selected_opportunities": [],
-        "completed_actions": [],
-        "started_at": datetime.now().isoformat(),
-        "feedback_rating": None,
-        "feedback_comment": ""
+    .entry-emoji {
+        position: absolute;
+        font-size: 1.25rem;
+        opacity: 0.55;
     }
-
-    for key, value in defaults.items():
-        if key not in st.session_state:
-            st.session_state[key] = value
-
-init_session_state()
-
-# =============================================================================
-# HELPER FUNCTIONS
-# =============================================================================
-
-def render_stepper(current_index: int):
-    """Simple 4-step visual: Map → Directions → Report → Sprint."""
-    steps = ["Map", "Directions", "Report & Coach", "Sprint"]
-    html = '<div class="stepper">'
-    for i, label in enumerate(steps):
-        if i < current_index:
-            circle_class = "step-circle step-circle-done"
-            icon = "✓"
-        elif i == current_index:
-            circle_class = "step-circle step-circle-active"
-            icon = str(i + 1)
-        else:
-            circle_class = "step-circle"
-            icon = str(i + 1)
-
-        html += f'''
-        <div style="display:flex;align-items:center;gap:0.25rem;">
-            <div class="{circle_class}">{icon}</div>
-            <div class="step-label">{label}</div>
-        </div>
-        '''
-        if i < len(steps) - 1:
-            html += '<div style="flex:0 0 16px;height:1px;background:#e5e7eb;margin:0 0.25rem;"></div>'
-    html += '</div>'
-    st.markdown(html, unsafe_allow_html=True)
-
-def get_skill(name):
-    return st.session_state.skills.get(name, 0)
-
-def get_group_score(group_key):
-    group = SKILL_GROUPS[group_key]
-    scores = [get_skill(s) for s in group["skills"] if get_skill(s) > 0]
-    return round(sum(scores) / len(scores)) if scores else 0
-
-def get_top_skills():
-    skills = [(k, v) for k, v in st.session_state.skills.items() if v > 0]
-    skills.sort(key=lambda x: x[1], reverse=True)
-    return [s[0] for s in skills[:5]]
-
-def get_career_match(career):
-    top = get_top_skills()
-    match = sum(1 for s in career["skills"] if s in top or get_skill(s) >= 50)
-    return round((match / len(career["skills"])) * 100)
-
-def get_roi(career):
-    gaps = [s for s in career["skills"] if get_skill(s) < 60]
-    potential = len(gaps) * round((career["p90"] - career["p10"]) * 0.08)
-    hours = len(gaps) * 100
-    readiness = "Ready" if len(gaps) <= 1 else "Stretch" if len(gaps) <= 2 else "Long-shot"
-    return {"gaps": gaps, "potential": potential, "hours": hours, "readiness": readiness}
-
-def get_directions():
-    scored = []
-    for c in CAREERS:
-        match = get_career_match(c)
-        gaps = [s for s in c["skills"] if get_skill(s) < 50]
-        scored.append({**c, "match": match, "gaps": gaps})
-    scored.sort(key=lambda x: x["match"], reverse=True)
-
-    return {
-        "deeper": [c for c in scored if c["match"] >= 65][:2],
-        "lateral": [c for c in scored if 40 <= c["match"] < 65][:3],
-        "stretch": [c for c in scored if c["match"] < 40 and (c["growth"] > 15 or c["median"] > 100000)][:2]
+    .entry-emoji.left {
+        left: 0.9rem;
+        bottom: 0.55rem;
     }
-
-def get_relevant_opportunities(career_id):
-    def filter_by_tag(items):
-        return [i for i in items if career_id in i.get("tags", [])][:3]
-
-    return {
-        "courses": filter_by_tag(OPPORTUNITIES["courses"]),
-        "events": filter_by_tag(OPPORTUNITIES["events"]),
-        "communities": filter_by_tag(OPPORTUNITIES["communities"])
+    .entry-emoji.right {
+        right: 0.85rem;
+        top: 0.65rem;
     }
-
-def generate_coach_summary():
-    career = next((c for c in CAREERS if c["id"] == st.session_state.selected_career), None)
-    if not career:
-        return
-
-    roi = get_roi(career)
-    top_skills = get_top_skills()
-    phase = PHASE_TEMPLATES.get(roi["readiness"], PHASE_TEMPLATES["Stretch"])
-
-    values = st.session_state.values
-    has_stability = "stability" in values["priorities"] or "money" in values["constraints"]
-
-    existing_vision = st.session_state.coach_summary.get("vision_12m", "")
-    existing_check_in = st.session_state.coach_summary.get(
-        "check_in_date",
-        (datetime.now() + timedelta(days=28)).strftime("%Y-%m-%d")
-    )
-
-    st.session_state.coach_summary = {
-        "direction_6_12m": f"Explore and move toward {career['title']} while {'maintaining stable income' if has_stability else 'building new skills and visibility'}.",
-        "phase_3m": {
-            "name": phase["name"],
-            "goal": phase["goal"]
-        },
-        "sprint_4w": {
-            "title": f"Talk to 2 {career['title']}s, start 1 mini project, sample 1 course",
-            "rationale": (
-                f"This sprint tests whether {career['title']} work feels energising using your "
-                f"existing {' and '.join(top_skills[:2]) if top_skills else 'core'} skills, and "
-                f"whether people in those roles see your background as a good fit."
-            ),
-            "actions": [
-                f"Identify 2–3 {career['title']}s on LinkedIn or in your network",
-                "Reach out and book 2 short conversations (15–30 min)",
-                f"Start 1 small {roi['gaps'][0] if roi['gaps'] else (top_skills[0] if top_skills else 'skills')}-focused project",
-                "Sample 1 course or module (even just the free preview)"
-            ]
-        },
-        "vision_12m": existing_vision,
-        "check_in_date": existing_check_in
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-top: 2rem;
+        margin-bottom: 0.4rem;
+        color: #020617;
     }
+    .section-caption {
+        font-size: 0.88rem;
+        color: #6b7280;
+        margin-bottom: 0.7rem;
+    }
+    .skill-chip {
+        display: inline-flex;
+        padding: 0.22rem 0.6rem;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-size: 0.78rem;
+        margin-right: 0.35rem;
+        margin-bottom: 0.25rem;
+    }
+    .direction-card {
+        border-radius: 14px;
+        padding: 0.9rem 1rem;
+        background: #ffffff;
+        border-left: 4px solid #22c55e;
+        margin-bottom: 0.7rem;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+    }
+    .direction-card.lateral { border-left-color: #0ea5e9; }
+    .direction-card.stretch { border-left-color: #f97316; }
+    .direction-header {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 0.1rem;
+    }
+    .direction-meta {
+        font-size: 0.78rem;
+        color: #6b7280;
+        margin-bottom: 0.35rem;
+    }
+    .direction-body {
+        font-size: 0.86rem;
+        color: #111827;
+    }
+    .pill-readiness {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.1rem 0.5rem;
+        border-radius: 999px;
+        font-size: 0.74rem;
+        margin-left: 0.4rem;
+        background: #ecfdf5;
+        color: #15803d;
+    }
+    .pill-readiness.stretch {
+        background: #fff7ed;
+        color: #c2410c;
+    }
+    .pill-readiness.longshot {
+        background: #f5f3ff;
+        color: #6d28d9;
+    }
+    .sprint-box {
+        background: #0f172a;
+        color: #e5e7eb;
+        border-radius: 16px;
+        padding: 0.95rem 1.05rem;
+        font-size: 0.9rem;
+        box-shadow: 0 16px 35px rgba(15, 23, 42, 0.6);
+    }
+    .sprint-tag {
+        font-size: 0.75rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #9ca3af;
+        margin-bottom: 0.35rem;
+    }
+    .sprint-title {
+        font-size: 0.98rem;
+        font-weight: 600;
+        margin-bottom: 0.2rem;
+    }
+    .sprint-body {
+        font-size: 0.86rem;
+        color: #d1d5db;
+    }
+    .coach-box {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 0.9rem 1.0rem;
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.04);
+    }
+    .coach-title {
+        font-size: 0.98rem;
+        font-weight: 600;
+        margin-bottom: 0.1rem;
+    }
+    .coach-caption {
+        font-size: 0.82rem;
+        color: #6b7280;
+        margin-bottom: 0.4rem;
+    }
+    .coach-reply {
+        font-size: 0.9rem;
+        color: #111827;
+        margin-top: 0.45rem;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
-def extract_values(text):
-    lower = text.lower()
-    priorities = ["growth", "stability", "impact", "creativity", "flexibility", "money", "people", "learning", "leadership", "community"]
-    constraints = ["time", "money", "family", "location", "visa", "experience", "degree", "age"]
 
-    for p in priorities:
-        if p in lower and p not in st.session_state.values["priorities"]:
-            st.session_state.values["priorities"].append(p)
+# -------------------------
+# LLM COACH HELPER
+# -------------------------
 
-    for c in constraints:
-        if c in lower and c not in st.session_state.values["constraints"]:
-            st.session_state.values["constraints"].append(c)
+def get_ai_coach_reply(prompt_text: str, user_context: dict) -> str:
+    """
+    Route the AI Career Coach to Anthropic (Claude) or OpenAI (ChatGPT)
+    depending on LLM_PROVIDER in Streamlit secrets.
+    Falls back to a scripted response if no valid provider/key.
+    """
 
-# =============================================================================
-# AI COACH
-# =============================================================================
+    provider = st.secrets.get("LLM_PROVIDER", "anthropic").lower()
+    anthropic_key = st.secrets.get("ANTHROPIC_API_KEY")
+    openai_key = st.secrets.get("OPENAI_API_KEY")
 
-def get_ai_response(user_message: str):
-    career = next((c for c in CAREERS if c["id"] == st.session_state.selected_career), None)
-    roi = get_roi(career) if career else {"gaps": [], "readiness": "Unknown"}
-    top_skills = get_top_skills()
+    def fallback_reply() -> str:
+        strengths = ", ".join(user_context.get("top_strengths", [])) or "your existing strengths"
+        career = user_context.get("chosen_direction_label") or "the roles you are exploring"
+        main_gap = user_context.get("main_gap") or "one or two key skills"
+        horizon = user_context.get("horizon_label", "the next 3–6 months")
 
-    system_prompt = f"""You are a thoughtful career coach. Context: exploring {career['title'] if career else 'careers'}, skills: {', '.join(top_skills)}, gaps: {', '.join(roi['gaps'])}, readiness: {roi['readiness']}.
+        return (
+            f"Here is how I would think about {horizon} from here:\n\n"
+            f"1. **Anchor in what already works.** {strengths} are not accidents – they are the "
+            f"foundation for any career move you make. Design your next steps so they keep showing up.\n\n"
+            f"2. **Treat {career} as a hypothesis, not a destiny.** Use the next phase to *test* whether "
+            "the work, people, and problems in that direction feel right in practice.\n\n"
+            f"3. **Deliberate stretch.** Focus on {main_gap}. Choose one small project, habit, or commitment "
+            "you can realistically sustain for 4–6 weeks that directly exercises that skill.\n\n"
+            "4. **Make it a shared conversation.** Take this report and your draft plan to a mentor, friend, "
+            "or counsellor. Ask them: *What feels true? What feels off? What are we not seeing?*\n\n"
+            "The goal is not to find a perfect plan, but to keep taking informed, low-risk steps that teach you "
+            "more about what actually fits."
+        )
 
-Help them articulate values, constraints, and what success looks like. Keep responses under 80 words. Ask one follow-up question.
-
-Remember: real career change takes months to years. You are helping them choose better experiments, not promising transformation in weeks."""
-    # Anthropic if available
-    if ANTHROPIC_AVAILABLE:
+    # Anthropic / Claude
+    if provider == "anthropic" and anthropic_key:
         try:
-            api_key = st.secrets.get("ANTHROPIC_API_KEY", None)
-            if api_key:
-                client = Anthropic(api_key=api_key)
-                messages = [{"role": m["role"], "content": m["content"]} for m in st.session_state.chat_messages]
-                response = client.messages.create(
-                    model="claude-3-5-sonnet-20240620",
-                    max_tokens=250,
-                    system=system_prompt,
-                    messages=messages
-                )
-                return response.content[0].text
-        except Exception:
-            pass  # fall back below
-
-    fallbacks = [
-        f"That is helpful to hear. It sounds like your goals really matter to you. What would ‘good progress’ look like in 3 months if you were moving toward {career['title'] if career else 'your target path'}?",
-        "Thanks for sharing that. Career moves unfold over months, not weeks. What constraints are you working within right now – time, money, location, or something else?",
-        "That makes sense. If you could run one small experiment over the next month to test this, what would it look like?"
-    ]
-    idx = len(st.session_state.chat_messages) % len(fallbacks)
-    return fallbacks[idx]
-
-def start_conversation():
-    career = next((c for c in CAREERS if c["id"] == st.session_state.selected_career), None)
-    if career and not st.session_state.chat_messages:
-        st.session_state.chat_messages = [{
-            "role": "assistant",
-            "content": (
-                f"I see you are exploring {career['title']}. I am not here to predict a perfect job, "
-                "but to help you describe what matters, what is hard, and what a realistic next experiment looks like. "
-                "What matters most in your career right now – growth, stability, impact, or something else?"
+            client = anthropic.Anthropic(api_key=anthropic_key)
+            system_msg = (
+                "You are a gentle but honest career coach. You help people turn structured assessments "
+                "into a realistic 3–6 month plan. You focus on experiments, conversations, and habits. "
+                "You do not promise specific salaries or guaranteed outcomes. You speak clearly and simply."
             )
-        }]
+            messages = [
+                {
+                    "role": "user",
+                    "content": (
+                        "Here is structured context about the user:\n"
+                        f"{json.dumps(user_context, indent=2)}\n\n"
+                        f"Here is what they just wrote:\n{prompt_text}\n\n"
+                        "Give them: (1) what matters most right now, "
+                        "(2) how to frame the next 3–6 months, "
+                        "(3) 1–3 concrete, low-risk experiments they can run. "
+                        "Keep it under 350 words."
+                    ),
+                }
+            ]
+            resp = client.messages.create(
+                model="claude-3-5-sonnet-latest",
+                max_tokens=500,
+                temperature=0.5,
+                system=system_msg,
+                messages=messages,
+            )
+            return resp.content[0].text.strip()
+        except Exception as e:
+            st.warning(f"Claude error – using fallback coach. ({e})")
+            return fallback_reply()
 
-# =============================================================================
-# DATA COLLECTION
-# =============================================================================
+    # OpenAI / ChatGPT
+    if provider == "openai" and openai_key:
+        try:
+            os.environ["OPENAI_API_KEY"] = openai_key
+            client = OpenAI()
+            system_msg = (
+                "You are a thoughtful, evidence-aware career coach. "
+                "You help users turn an assessment into a 3–6 month plan with small experiments. "
+                "Avoid hype. Avoid guarantees. Be practical and encouraging."
+            )
+            completion = client.chat.completions.create(
+                model="gpt-4.1-mini",
+                max_tokens=500,
+                temperature=0.6,
+                messages=[
+                    {"role": "system", "content": system_msg},
+                    {
+                        "role": "user",
+                        "content": (
+                            "Here is structured context about the user:\n"
+                            f"{json.dumps(user_context, indent=2)}\n\n"
+                            f"Here is what they just wrote:\n{prompt_text}\n\n"
+                            "Give them: (1) what matters most right now, "
+                            "(2) how to think about the next 3–6 months, "
+                            "(3) 1–3 specific experiments to try. "
+                            "Keep it under 350 words."
+                        ),
+                    },
+                ],
+            )
+            return completion.choices[0].message.content.strip()
+        except Exception as e:
+            st.warning(f"OpenAI error – using fallback coach. ({e})")
+            return fallback_reply()
 
-def collect_data():
-    career = next((c for c in CAREERS if c["id"] == st.session_state.selected_career), None)
-    roi = get_roi(career) if career else None
+    # Fallback
+    return fallback_reply()
 
-    return {
-        "session_id": st.session_state.session_id,
-        "session_type": "first_run",
-        "timestamp": datetime.now().isoformat(),
-        "started_at": st.session_state.started_at,
-        "user_location": {"city": "Melbourne", "country": "AU"},
 
-        "entry_path": st.session_state.lens,
-        "skills": st.session_state.skills,
-        "skill_count": len([k for k, v in st.session_state.skills.items() if v > 0]),
+# -------------------------
+# DATA & HELPER FUNCTIONS
+# -------------------------
 
-        "exploring_roles": st.session_state.exploring,
-        "selected_career": st.session_state.selected_career,
-        "career_title": career["title"] if career else None,
+SKILL_GROUPS = {
+    "Cognitive": [
+        "Problem solving",
+        "Learning new things quickly",
+        "Analytical thinking",
+    ],
+    "Technical / Tools": [
+        "Working with data or numbers",
+        "Using digital tools / software",
+        "Building or fixing systems",
+    ],
+    "People / Communication": [
+        "Explaining ideas clearly",
+        "Listening and supporting others",
+        "Leading or organising people",
+    ],
+    "Execution / Delivery": [
+        "Finishing what you start",
+        "Managing your time",
+        "Handling pressure or setbacks",
+    ],
+}
 
-        "results": {
-            "match": get_career_match(career) if career else None,
-            "potential_uplift": roi["potential"] if roi else None,
-            "readiness": roi["readiness"] if roi else None,
-            "salary_range": {
-                "p10": career["p10"],
-                "p50": career["median"],
-                "p90": career["p90"]
-            } if career else None,
-            "gaps": roi["gaps"] if roi else []
-        } if career else None,
+CAREER_OPTIONS = [
+    "Product manager",
+    "Software developer",
+    "Data analyst",
+    "UX designer",
+    "Marketing specialist",
+    "Teacher / educator",
+    "Healthcare worker",
+    "Policy / public sector",
+    "Entrepreneur / founder",
+    "Undecided / just exploring",
+]
 
-        "values": st.session_state.values,
-        "coach_summary": st.session_state.coach_summary,
 
-        "opportunities": [
-            {"id": oid, "selected": True}
-            for oid in st.session_state.selected_opportunities
-        ],
+def ensure_data_dir():
+    os.makedirs("careercraft_sessions", exist_ok=True)
 
-        "chat_transcript": st.session_state.chat_messages,
 
-        "completed_assessment": len([k for k, v in st.session_state.skills.items() if v > 0]) >= 4,
-        "viewed_report": st.session_state.screen in ["report", "wrapup"],
-        "had_conversation": len(st.session_state.chat_messages) > 2,
-        "set_experiment": bool(st.session_state.coach_summary.get("sprint_4w", {}).get("title")),
-        "selected_opportunities_count": len(st.session_state.selected_opportunities),
-        "set_long_term_vision": bool(st.session_state.coach_summary.get("vision_12m")),
-        "feedback": {
-            "rating": st.session_state.get("feedback_rating"),
-            "comment": st.session_state.get("feedback_comment", "")
-        }
-    }
+def save_session(payload: dict):
+    try:
+        ensure_data_dir()
+        ts = datetime.utcnow().strftime("%Y%m%dT%H%M%S")
+        fname = f"careercraft_sessions/session_{ts}.json"
+        with open(fname, "w", encoding="utf-8") as f:
+            json.dump(payload, f, indent=2)
+    except Exception:
+        # Silent failure is fine for now – we do not want to block UX
+        pass
 
-def save_session():
-    data = collect_data()
-    filepath = DATA_DIR / f"{st.session_state.session_id}.json"
-    with open(filepath, "w") as f:
-        json.dump(data, f, indent=2)
-    return filepath
 
-# =============================================================================
-# SCREENS
-# =============================================================================
+def compute_strengths_and_gaps(skill_scores: dict):
+    # skill_scores: {label: 0-100}
+    if not skill_scores:
+        return [], None
 
-def render_landing():
+    items = sorted(skill_scores.items(), key=lambda x: x[1], reverse=True)
+    top_strengths = [s for s, v in items[:3] if v >= 55]
+    main_gap = items[-1][0] if items[-1][1] <= 45 else None
+    return top_strengths, main_gap
+
+
+def infer_direction(entry_mode: str, career_choice: str, strengths: list):
+    if career_choice and career_choice != "Undecided / just exploring":
+        direction_label = career_choice
+    elif strengths:
+        direction_label = f"roles that lean on {strengths[0].lower()}"
+    else:
+        direction_label = "a small set of test roles, not one perfect answer"
+
+    return direction_label
+
+
+def readiness_band(num_gaps: int):
+    if num_gaps <= 1:
+        return "Ready"
+    elif num_gaps <= 3:
+        return "Stretch"
+    else:
+        return "Long-shot"
+
+
+# -------------------------
+# MAIN UI SECTIONS
+# -------------------------
+
+def render_hero():
     st.markdown(
         """
         <div class="hero-card">
-            <div class="hero-badge">
-                🧪 CareerCheck • ~7–10 minutes
+          <div class="badge-pill">
+            <div class="pill-dot"></div>
+            CareerCheck • ~ 7–10 minutes
+          </div>
+          <div class="hero-title">
+            Build a clearer career story before you talk to anyone.
+          </div>
+          <p class="hero-sub">
+            CareerCraft turns your skills and options into a 6–12 month direction, a 3-month phase,
+            and a 4–6 week sprint you can take to a mentor, friend, or counsellor.
+          </p>
+          <div class="hero-grid">
+            <div>
+              <div class="hero-pill-col-title">You will leave with</div>
+              <div class="hero-pill-col-body">
+                • A short list of directions that fit you<br/>
+                • The next 3 months framed as a clear phase<br/>
+                • A simple 4–6 week experiment plan
+              </div>
             </div>
-            <div class="hero-title">
-                Build a clearer career story<br/>before you talk to anyone.
+            <div>
+              <div class="hero-pill-col-title">How CareerCraft is different</div>
+              <div class="hero-pill-col-body">
+                Not a magic quiz. Not a chatbot pretending to know your destiny.
+                A structured pre-conversation layer that makes mentoring, coaching,
+                and self-reflection more concrete.
+              </div>
             </div>
-            <p class="hero-subtitle">
-                CareerCraft takes your skills and options and turns them into a 6–12 month direction,
-                a 3-month phase, and a 4-week sprint you can take to a mentor, friend, or counsellor.
-            </p>
-            <p class="hero-subsubtitle">
-                Not a magic quiz. Not a chatbot pretending to know your destiny. A structured pre-conversation layer.
-            </p>
-            <p class="hero-meta">
-                🌏 For students, early-career professionals, career-changers, and the mentors who back them.
-            </p>
+            <div>
+              <div class="hero-pill-col-title">Designed for</div>
+              <div class="hero-pill-col-body">
+                Students, early-career professionals, career-changers, and the mentors
+                who back them.
+              </div>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; margin-top:1.5rem; gap:1rem;">
+            <button class="cc-primary-btn" id="cc-start-btn">
+              ✨ Start a CareerCheck<span>→</span>
+            </button>
+            <div class="cc-secondary-text">
+              No signup required. We will not promise your dream job in 30 days.
+            </div>
+          </div>
+          <div class="hero-footnote">
+            This is decision support, not prophecy. Use it as a conversation starter, not a verdict.
+          </div>
+        </div>
+        <script>
+        const btn = window.parent.document.getElementById('cc-start-btn');
+        if (btn) {
+            btn.addEventListener('click', function() {
+                window.parent.postMessage({type: 'cc-start'}, '*');
+            });
+        }
+        </script>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def handle_start_message():
+    # Streamlit cannot directly listen to postMessage; instead,
+    # we mirror the hero button with a normal Streamlit button for reliability.
+    st.session_state.setdefault("started", False)
+    st.session_state.setdefault("entry_mode", None)
+
+    # Hidden real button below hero
+    col1, col2, col3 = st.columns([2.2, 1, 1])
+    with col1:
+        if st.button("✨ Start a CareerCheck", use_container_width=True):
+            st.session_state["started"] = True
+
+
+def render_entry_cards():
+    st.markdown(
+        """
+        <div class="entry-row">
+          <div class="entry-card">
+            <div class="entry-pill-label">Path A</div>
+            <div class="entry-title">Start from my skills</div>
+            <div class="entry-body">
+              Map what you are already good at across cognitive, technical, people, and execution skills.
+              We will suggest directions that make the most of what is already working.
+            </div>
+            <div class="entry-cta">Choose this if you feel more clear on who you are than where you are going.</div>
+            <div class="entry-emoji left">🎯</div>
+          </div>
+          <div class="entry-card">
+            <div class="entry-pill-label">Path B</div>
+            <div class="entry-title">Start from a career</div>
+            <div class="entry-body">
+              Pick a role (or a few) you are curious about. We will check how close you are,
+              where the gaps are, and how to test it without burning everything down.
+            </div>
+            <div class="entry-cta">Choose this if you have some directions in mind, even loosely.</div>
+            <div class="entry-emoji right">🧭</div>
+          </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    col_main, col_side = st.columns([2.2, 1.4])
+    st.write("")  # spacing
 
-    with col_main:
-        c1, c2 = st.columns(2)
-        with c1:
-            if st.button("✨ Start a CareerCheck", type="primary", use_container_width=True, key="start_main"):
-                st.session_state.lens = "skills"
-                st.session_state.screen = "skills"
-                st.rerun()
-            st.caption("Free. No login. Best used before a real conversation.")
-        with c2:
-            st.markdown("**You will leave with:**")
-            st.markdown("- A 6–12 month *direction*\n- A 3-month *phase focus*\n- A concrete 4-week *experiment*")
-
-    with col_side:
-        st.markdown("**How CareerCraft is different**")
-        st.markdown(
-            "- Direction, not prediction\n"
-            "- Designed for repeated use (2–4 checks over months)\n"
-            "- Built for conversations: mentor, counsellor, friend"
-        )
-
-    st.markdown("---")
-
-    st.markdown("#### Start from what feels easier today")
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.markdown("###### 🎯 Start from your skills")
-        st.markdown(
-            "Map how you actually spend your energy each week, across thinking, technical, people, and delivery skills."
-        )
-        if st.button("Start from my skills →", use_container_width=True, key="btn_skills_card"):
-            st.session_state.lens = "skills"
-            st.session_state.screen = "skills"
-            st.rerun()
-
-    with col2:
-        st.markdown("###### 🧭 Start from a career")
-        st.markdown(
-            "Pick 1–3 roles you are exploring and get a quick read on match, gaps, and what a realistic path might look like."
-        )
-        if st.button("Start from a career →", use_container_width=True, key="btn_careers_card"):
-            st.session_state.lens = "careers"
-            st.session_state.screen = "careers"
-            st.rerun()
-
-    st.markdown("---")
-    cols = st.columns(4)
+    cols = st.columns(2)
     with cols[0]:
-        st.markdown("📊 **Salary bands & skill gaps**")
+        if st.button("Start from my skills →", use_container_width=True):
+            st.session_state["started"] = True
+            st.session_state["entry_mode"] = "skills"
     with cols[1]:
-        st.markdown(f"🧭 **{len(CAREERS)} example careers**")
-    with cols[2]:
-        st.markdown("💬 **AI coach (pre-conversation)**")
-    with cols[3]:
-        st.markdown("🔁 **Repeatable CareerChecks over months**")
+        if st.button("Start from a career →", use_container_width=True):
+            st.session_state["started"] = True
+            st.session_state["entry_mode"] = "career"
 
-def render_skills_entry():
-    answered = len([k for k, v in st.session_state.skills.items() if v > 0])
-    total = sum(len(g["skills"]) for g in SKILL_GROUPS.values())
-    pct = int((answered / total) * 100)
 
-    col1, col2 = st.columns([1, 4])
+def render_skills_flow():
+    st.markdown('<div class="section-title">Step 1 · Map your skills</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="section-caption">Rate how often each statement feels true in your current real life.</div>',
+        unsafe_allow_html=True,
+    )
+
+    skill_scores = {}
+    for group, skills in SKILL_GROUPS.items():
+        st.markdown(f"**{group}**")
+        cols = st.columns(len(skills))
+        for col, skill in zip(cols, skills):
+            with col:
+                val = st.slider(
+                    skill,
+                    min_value=0,
+                    max_value=100,
+                    value=60,
+                    step=10,
+                    help="0 = almost never, 100 = this shows up most weeks",
+                )
+                skill_scores[skill] = val
+        st.write("")
+
+    curious_role = st.text_input(
+        "If there is a role or direction you are curious about, write it here (optional):",
+        placeholder="e.g. Product management in tech, community health, social impact consulting…",
+    )
+
+    if st.button("Generate my CareerCheck →", type="primary", use_container_width=True):
+        st.session_state["skill_scores"] = skill_scores
+        st.session_state["curious_role"] = curious_role
+        st.session_state["flow_done"] = True
+
+
+def render_career_flow():
+    st.markdown('<div class="section-title">Step 1 · Choose the directions you want to test</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="section-caption">You can always change your mind later. This is about testing hypotheses, not locking in forever.</div>',
+        unsafe_allow_html=True,
+    )
+
+    current = st.selectbox(
+        "Your current situation",
+        ["Student", "Working in a job", "Between roles", "Something else / mixed"],
+    )
+    target = st.multiselect(
+        "Roles or directions you are considering",
+        options=CAREER_OPTIONS,
+        default=["Undecided / just exploring"],
+        help="Pick 1–3 that feel relevant, even if you are not sure.",
+    )
+
+    st.markdown("**Quick sense check – how do these feel right now?**")
+    col1, col2, col3 = st.columns(3)
     with col1:
-        if st.button("← Back"):
-            st.session_state.screen = "landing"
-            st.rerun()
+        pull = st.slider("How strong is the pull towards these directions?", 0, 100, 70, 10)
     with col2:
-        render_stepper(0)
-        st.markdown(f"**{answered}/{total} skills** mapped")
+        risk = st.slider("How risky would a move feel right now?", 0, 100, 50, 10)
+    with col3:
+        energy = st.slider("How much energy do you have for career changes?", 0, 100, 60, 10)
+
+    if st.button("Generate my CareerCheck →", type="primary", use_container_width=True):
+        st.session_state["career_current"] = current
+        st.session_state["career_targets"] = target
+        st.session_state["career_pulls"] = {"pull": pull, "risk": risk, "energy": energy}
+        st.session_state["flow_done"] = True
+
+
+def render_results_and_coach(entry_mode: str):
+    st.markdown('<div class="section-title">Step 2 · Directions from here</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="section-caption">These are not predictions. They are starting points for better conversations.</div>',
+        unsafe_allow_html=True,
+    )
+
+    if entry_mode == "skills":
+        skill_scores = st.session_state.get("skill_scores", {})
+        curious_role = st.session_state.get("curious_role", "").strip()
+        strengths, gap = compute_strengths_and_gaps(skill_scores)
+        direction_label = infer_direction(entry_mode, curious_role, strengths)
+        num_gaps = len([s for s, v in skill_scores.items() if v <= 50])
+    else:
+        skill_scores = {}
+        strengths, gap = [], None
+        targets = st.session_state.get("career_targets", [])
+        direction_label = ", ".join(targets) if targets else "a few test directions"
+        pulls = st.session_state.get("career_pulls", {})
+        num_gaps = 2 if pulls.get("risk", 50) > 60 else 1
+
+    readiness = readiness_band(num_gaps)
+    horizon_label = "the next 3–6 months"
+
+    # Directions cards (deeper / lateral / stretch)
+    col_left, col_right = st.columns([1.1, 1.1])
+    with col_left:
+        st.markdown("**Career directions**")
+        # Deeper
         st.markdown(
-            f'<div class="progress-bar"><div class="progress-fill" style="width: {pct}%;"></div></div>',
+            f"""
+            <div class="direction-card">
+              <div class="direction-header">
+                Go deeper in this lane
+                <span class="pill-readiness">{readiness}</span>
+              </div>
+              <div class="direction-meta">
+                Anchored in: {direction_label}
+              </div>
+              <div class="direction-body">
+                Double down where you already have traction. Look for ways to increase scope, complexity
+                or responsibility without completely changing environment.
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        # Lateral
+        st.markdown(
+            """
+            <div class="direction-card lateral">
+              <div class="direction-header">
+                Explore a lateral move
+              </div>
+              <div class="direction-meta">
+                Keep your strengths, change the context
+              </div>
+              <div class="direction-body">
+                Identify roles that use a similar skill mix in a different team, industry, or organisation type.
+                Think of this as "same muscles, new arena".
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        # Stretch
+        st.markdown(
+            """
+            <div class="direction-card stretch">
+              <div class="direction-header">
+                Design one stretch experiment
+                <span class="pill-readiness stretch">Stretch</span>
+              </div>
+              <div class="direction-meta">
+                4–6 week, low-risk test
+              </div>
+              <div class="direction-body">
+                Choose a project, course, or commitment that feels slightly uncomfortable but not catastrophic.
+                The goal is to learn about fit, not to prove yourself once and for all.
+              </div>
+            </div>
+            """,
             unsafe_allow_html=True,
         )
 
-    st.markdown("## Map your skills")
-    st.markdown("Think about how you actually spend your time in a typical week.")
-
-    for group_key, group in SKILL_GROUPS.items():
-        with st.expander(f"{group['icon']} {group['name']}", expanded=True):
-            for skill in group["skills"]:
-                cols = st.columns([2, 4])
-                with cols[0]:
-                    st.markdown(f"**{skill}**")
-                with cols[1]:
-                    level_cols = st.columns(4)
-                    for i, level in enumerate(SKILL_LEVELS):
-                        with level_cols[i]:
-                            btn_type = "primary" if get_skill(skill) == level["value"] else "secondary"
-                            if st.button(
-                                level["label"],
-                                key=f"skill_{skill}_{level['value']}",
-                                type=btn_type,
-                                use_container_width=True,
-                            ):
-                                st.session_state.skills[skill] = level["value"]
-                                st.rerun()
-
-    st.markdown("---")
-
-    if answered >= 4:
-        if st.button("See my career directions →", type="primary", use_container_width=True):
-            st.session_state.screen = "directions"
-            st.rerun()
-    else:
-        st.button("See my career directions →", disabled=True, use_container_width=True)
-        st.caption("Map at least 4 skills to continue.")
-
-def render_careers_entry():
-    col_top_1, col_top_2 = st.columns([1, 4])
-    with col_top_1:
-        if st.button("← Back"):
-            st.session_state.screen = "landing"
-            st.rerun()
-    with col_top_2:
-        render_stepper(0)
-
-    st.markdown("## What are you exploring?")
-    st.markdown("Pick 1–3 careers you are curious about.")
-
-    cols = st.columns(4)
-    for i, career in enumerate(CAREERS):
-        with cols[i % 4]:
-            is_selected = career["id"] in st.session_state.exploring
-            btn_style = "primary" if is_selected else "secondary"
-
-            if st.button(
-                f"{career['icon']}\n{career['title']}\n${career['median']//1000}k",
-                key=f"career_{career['id']}",
-                type=btn_style,
-                use_container_width=True,
-            ):
-                if is_selected:
-                    st.session_state.exploring.remove(career["id"])
-                elif len(st.session_state.exploring) < 3:
-                    st.session_state.exploring.append(career["id"])
-                st.rerun()
-
-    if st.session_state.exploring:
-        st.markdown("---")
-        st.markdown("**Quick check:** Which skills feel most like you across these roles?")
-
-        all_skills = set()
-        for cid in st.session_state.exploring:
-            career = next((c for c in CAREERS if c["id"] == cid), None)
-            if career:
-                all_skills.update(career["skills"])
-
-        skill_list = list(all_skills)
-        cols = st.columns(min(len(skill_list), 4))
-        for i, skill in enumerate(skill_list):
-            with cols[i % 4]:
-                is_active = get_skill(skill) >= 60
-                btn_type = "primary" if is_active else "secondary"
-                if st.button(skill, key=f"quick_{skill}", type=btn_type, use_container_width=True):
-                    st.session_state.skills[skill] = 30 if is_active else 75
-                    st.rerun()
-
-    st.markdown("---")
-
-    if st.session_state.exploring:
-        if st.button("See my career directions →", type="primary", use_container_width=True):
-            st.session_state.screen = "directions"
-            st.rerun()
-    else:
-        st.button("See my career directions →", disabled=True, use_container_width=True)
-
-def render_directions():
-    col_top_1, col_top_2 = st.columns([1, 4])
-    with col_top_1:
-        if st.button("← Edit"):
-            st.session_state.screen = "skills" if st.session_state.lens == "skills" else "careers"
-            st.rerun()
-    with col_top_2:
-        render_stepper(1)
-
-    directions = get_directions()
-    top_skills = get_top_skills()
-
-    col1, col2 = st.columns([2, 3])
-
-    with col1:
-        st.markdown("### 🎯 Your skills snapshot")
-        for group_key, group in SKILL_GROUPS.items():
-            score = get_group_score(group_key)
-            st.markdown(f"**{group['icon']} {group['name']}** – {score}%")
-            st.progress(score / 100 if score else 0.0)
-
-        if top_skills:
-            st.markdown("**Top strengths (from today):**")
-            st.markdown(" ".join([f"`{s}`" for s in top_skills]))
-
-    with col2:
-        st.markdown("### 🧭 Career directions from here")
-
-        st.markdown("🟢 **Deeper in your lane**")
-        if directions["deeper"]:
-            for c in directions["deeper"]:
-                roi = get_roi(c)
-                if st.button(
-                    f"{c['icon']} {c['title']} – ${c['p10']//1000}k–${c['p90']//1000}k ({c['match']}% match, {roi['readiness']})",
-                    key=f"dir_{c['id']}",
-                    use_container_width=True,
-                ):
-                    st.session_state.selected_career = c["id"]
-                    st.session_state.screen = "report"
-                    st.rerun()
-        else:
-            st.caption("Add more skills to see closer matches.")
-
-        st.markdown("🔵 **Lateral moves**")
-        if directions["lateral"]:
-            for c in directions["lateral"]:
-                roi = get_roi(c)
-                if st.button(
-                    f"{c['icon']} {c['title']} – ${c['p10']//1000}k–${c['p90']//1000}k ({c['match']}% match, {roi['readiness']})",
-                    key=f"dir_{c['id']}",
-                    use_container_width=True,
-                ):
-                    st.session_state.selected_career = c["id"]
-                    st.session_state.screen = "report"
-                    st.rerun()
-        else:
-            st.caption("Add a few more skills or roles.")
-
-        st.markdown("🟠 **Stretch paths**")
-        if directions["stretch"]:
-            for c in directions["stretch"]:
-                roi = get_roi(c)
-                if st.button(
-                    f"{c['icon']} {c['title']} – ${c['p10']//1000}k–${c['p90']//1000}k ({c['match']}% match, {roi['readiness']})",
-                    key=f"dir_{c['id']}",
-                    use_container_width=True,
-                ):
-                    st.session_state.selected_career = c["id"]
-                    st.session_state.screen = "report"
-                    st.rerun()
-        else:
-            st.caption("Your strongest paths are already above.")
-
-def render_report():
-    career = next((c for c in CAREERS if c["id"] == st.session_state.selected_career), None)
-    if not career:
-        st.session_state.screen = "directions"
-        st.rerun()
-        return
-
-    roi = get_roi(career)
-    start_conversation()
-
-    col_top_1, col_top_2 = st.columns([1, 4])
-    with col_top_1:
-        if st.button("← Back"):
-            st.session_state.screen = "directions"
-            st.rerun()
-    with col_top_2:
-        render_stepper(2)
-
-    st.markdown(
-        f"""
-        <div class="hero-gradient">
-            <div style="font-size: 3rem;">{career['icon']}</div>
-            <p style="opacity: 0.8;">CareerCheck report for</p>
-            <h1>{career['title']}</h1>
-            <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
-                <div class="stat-card">
-                    <div class="stat-value">+${roi['potential']:,}</div>
-                    <div class="stat-label">Potential uplift / yr*</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">{roi['readiness']}</div>
-                    <div class="stat-label">Readiness band</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">{roi['hours']}h</div>
-                    <div class="stat-label">Approx. hours to close gaps</div>
-                </div>
+    # Sprint + Coach
+    with col_right:
+        # Sprint box
+        sprint_focus = gap or "one focused skill or habit"
+        st.markdown(
+            f"""
+            <div class="sprint-box">
+              <div class="sprint-tag">4–6 week sprint</div>
+              <div class="sprint-title">Make {sprint_focus.lower()} the centre of gravity.</div>
+              <div class="sprint-body">
+                Pick one anchor activity that directly exercises this: a small project at work,
+                a side project, a course with assignments, or a volunteer role. Protect
+                2–4 hours a week for it. At the end of the sprint, review: what felt alive,
+                what drained you, and what you want more or less of.
+              </div>
             </div>
-            <p style="font-size: 0.8rem; margin-top: 0.75rem; opacity: 0.8;">
-                *This is an expectation range, not a guarantee. It should be used as decision support alongside human advice.
-            </p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+            """,
+            unsafe_allow_html=True,
+        )
 
-    tab1, tab2, tab3 = st.tabs(["📊 Overview", "📚 Learning", "💬 AI Coach"])
+        st.write("")
+        st.markdown(
+            """
+            <div class="coach-box">
+              <div class="coach-title">AI Career Coach</div>
+              <div class="coach-caption">
+                Use this to shape what you want to talk about with a mentor, friend, or counsellor.
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        user_note = st.text_area(
+            "Before you talk to someone, what feels most important, unclear, or scary about your career right now?",
+            placeholder="Write a few sentences. This is just for you and the coach.",
+        )
+        coach_reply = ""
+        if st.button("Ask the Career Coach →", use_container_width=True):
+            context = {
+                "entry_mode": entry_mode,
+                "direction_label": direction_label,
+                "top_strengths": strengths,
+                "main_gap": gap,
+                "horizon_label": horizon_label,
+            }
+            coach_reply = get_ai_coach_reply(user_note or "No extra note provided.", context)
+            st.session_state["coach_reply"] = coach_reply
 
-    with tab1:
-        st.markdown("### Salary range")
-        col1, col2, col3 = st.columns([1, 3, 1])
-        with col1:
-            st.metric("P10", f"${career['p10']//1000}k")
-        with col2:
-            st.progress(0.5)
-            st.caption(f"Median: ${career['median']//1000}k")
-        with col3:
-            st.metric("P90", f"${career['p90']//1000}k")
+        if not coach_reply:
+            coach_reply = st.session_state.get("coach_reply", "")
 
-        st.markdown("### Skill gaps to close")
-        if roi["gaps"]:
-            for gap in roi["gaps"]:
-                col1, col2 = st.columns([2, 3])
-                with col1:
-                    st.markdown(f"**{gap}**")
-                with col2:
-                    current = get_skill(gap)
-                    st.progress(current / 100 if current else 0.0)
-                    st.caption(f"{current}% → 70%")
-        else:
-            st.success("✨ No major gaps – you are effectively ready. Focus on experience and visibility.")
+        if coach_reply:
+            st.markdown(f'<div class="coach-box coach-reply">{coach_reply}</div>', unsafe_allow_html=True)
 
-    with tab2:
-        if roi["gaps"]:
-            for gap in roi["gaps"]:
-                st.markdown(f"### {gap}")
-                st.markdown("Recommended courses for this skill will appear here as we connect real providers.")
-        else:
-            st.info("You already have the core skills. The next step is building real projects and social proof.")
-
-    with tab3:
-        st.markdown("### 🤖 Career coach (before you talk to a human)")
-        st.caption("Use this to get language for your values, constraints, and next experiment.")
-
-        for msg in st.session_state.chat_messages:
-            if msg["role"] == "assistant":
-                st.markdown(f'<div class="chat-assistant">{msg["content"]}</div>', unsafe_allow_html=True)
-            else:
-                st.markdown(f'<div class="chat-user">{msg["content"]}</div>', unsafe_allow_html=True)
-
-        user_input = st.text_input("Share what matters to you right now...", key="chat_input")
-
-        col1, col2 = st.columns([3, 1])
-        with col2:
-            if st.button("Send", type="primary", use_container_width=True):
-                if user_input:
-                    st.session_state.chat_messages.append({"role": "user", "content": user_input})
-                    extract_values(user_input)
-                    st.session_state.values["raw_responses"].append(user_input)
-
-                    response = get_ai_response(user_message=user_input)
-                    st.session_state.chat_messages.append({"role": "assistant", "content": response})
-                    generate_coach_summary()
-                    save_session()
-                    st.rerun()
-
-        st.markdown("**Quick prompts:**")
-        prompt_cols = st.columns(4)
-        prompts = ["Growth matters most", "I need stability", "Time is limited", "Impact is key"]
-        for i, prompt in enumerate(prompts):
-            with prompt_cols[i]:
-                if st.button(prompt, key=f"prompt_{i}", use_container_width=True):
-                    st.session_state.chat_messages.append({"role": "user", "content": prompt})
-                    extract_values(prompt)
-                    st.session_state.values["raw_responses"].append(prompt)
-
-                    response = get_ai_response(user_message=prompt)
-                    st.session_state.chat_messages.append({"role": "assistant", "content": response})
-                    generate_coach_summary()
-                    save_session()
-                    st.rerun()
-
-        if st.session_state.values["priorities"]:
-            st.markdown("**🎯 What we have heard so far:**")
-            st.markdown(" ".join([f"`{p}`" for p in st.session_state.values["priorities"]]))
-
-    st.markdown("---")
-
-    if st.button("Continue to your path & next sprint →", type="primary", use_container_width=True):
-        generate_coach_summary()
-        st.session_state.screen = "wrapup"
-        save_session()
-        st.rerun()
-
-def render_wrapup():
-    career = next((c for c in CAREERS if c["id"] == st.session_state.selected_career), None)
-    if not career:
-        st.session_state.screen = "directions"
-        st.rerun()
-        return
-
-    roi = get_roi(career)
-    cs = st.session_state.coach_summary
-
-    if not cs.get("direction_6_12m"):
-        generate_coach_summary()
-        cs = st.session_state.coach_summary
-
-    col_top_1, col_top_2 = st.columns([1, 4])
-    with col_top_1:
-        if st.button("← Back"):
-            st.session_state.screen = "report"
-            st.rerun()
-    with col_top_2:
-        render_stepper(3)
-
+    # Summary + export
+    st.markdown('<div class="section-title">Step 3 · Turn this into a conversation</div>', unsafe_allow_html=True)
     st.markdown(
         """
-        <div class="card-green" style="padding: 2rem; border-radius: 16px; margin-bottom: 2rem;">
-            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-                <div style="width: 48px; height: 48px; background: #22c55e; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">✓</div>
-                <div>
-                    <h2 style="margin: 0;">CareerCheck #1 complete 🎯</h2>
-                    <p style="margin: 0; color: #4b5563;">You now have direction, a phase focus, and a next sprint to take into real conversations.</p>
-                </div>
-            </div>
-            <div style="background: white; padding: 1rem; border-radius: 8px; margin-top: 1rem; font-size: 0.875rem;">
-                <strong>Careers move over months and years, not weeks.</strong> CareerCraft exists to support 2–4 CareerChecks over time, so each sprint builds on the last.
-            </div>
+        <div class="section-caption">
+          Share this summary with someone you trust. The goal is not to defend the result, but to ask:
+          <em>What feels true? What feels off? What are we missing?</em>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    st.markdown("## 🧭 Your path and next sprint")
+    summary_cols = st.columns(3)
+    with summary_cols[0]:
+        st.markdown("**6–12 month direction**")
+        st.write(direction_label)
+    with summary_cols[1]:
+        st.markdown("**3-month phase**")
+        st.write("Stabilise your base, then deliberately test one or two adjacent directions.")
+    with summary_cols[2]:
+        st.markdown("**4–6 week sprint**")
+        st.write(f"Design a sprint around {gap or 'one focused skill or habit'} and review at the end.")
 
-    st.markdown('<div class="card-purple"><div class="section-label section-label-purple">6–12 MONTH DIRECTION</div></div>', unsafe_allow_html=True)
-    direction = st.text_area(
-        "Direction",
-        value=cs.get("direction_6_12m", ""),
-        key="direction_input",
-        label_visibility="collapsed",
-        height=68,
+    st.write("")
+    convo_text = (
+        "Here is how I am currently thinking about my career, using CareerCraft:\n\n"
+        f"- **Direction (6–12 months):** {direction_label}\n"
+        "- **Next 3 months:** Stabilise my base and deliberately test 1–2 adjacent directions.\n"
+        f"- **4–6 week sprint focus:** {gap or 'one focused skill or habit'}\n\n"
+        "I would love to talk this through with you – what feels true, what feels off, and what "
+        "we might be missing."
     )
-    if direction != cs.get("direction_6_12m"):
-        st.session_state.coach_summary["direction_6_12m"] = direction
+    st.text_area("Copy this into an email or message to a mentor/friend:", value=convo_text, height=150)
 
-    st.markdown("")
-
-    st.markdown('<div class="card-blue"><div class="section-label section-label-blue">THIS 3-MONTH PHASE</div></div>', unsafe_allow_html=True)
-    phase_name = st.text_input(
-        "Phase name",
-        value=cs.get("phase_3m", {}).get("name", ""),
-        key="phase_name_input",
-        label_visibility="collapsed",
+    # Simple external search suggestions
+    st.markdown("**Optional – find local courses or events**")
+    query = st.text_input(
+        "What would you like to search for near you?",
+        placeholder="e.g. beginner product management course Melbourne, data meetups Sydney…",
     )
-    phase_goal = st.text_area(
-        "Phase goal",
-        value=cs.get("phase_3m", {}).get("goal", ""),
-        key="phase_goal_input",
-        label_visibility="collapsed",
-        height=68,
-    )
-
-    if phase_name != cs.get("phase_3m", {}).get("name"):
-        st.session_state.coach_summary["phase_3m"]["name"] = phase_name
-    if phase_goal != cs.get("phase_3m", {}).get("goal"):
-        st.session_state.coach_summary["phase_3m"]["goal"] = phase_goal
-
-    st.markdown("")
-
-    st.markdown('<div class="card-green"><div class="section-label section-label-green">NEXT 4-WEEK SPRINT</div></div>', unsafe_allow_html=True)
-    sprint_title = st.text_input(
-        "Sprint title",
-        value=cs.get("sprint_4w", {}).get("title", ""),
-        key="sprint_title_input",
-        label_visibility="collapsed",
-    )
-
-    if sprint_title != cs.get("sprint_4w", {}).get("title"):
-        st.session_state.coach_summary["sprint_4w"]["title"] = sprint_title
-
-    st.caption(cs.get("sprint_4w", {}).get("rationale", ""))
-
-    st.markdown("**Actions:**")
-    actions = cs.get("sprint_4w", {}).get("actions", [])
-    for i, action in enumerate(actions):
-        is_completed = i in st.session_state.completed_actions
-        if st.checkbox(action, value=is_completed, key=f"action_{i}"):
-            if i not in st.session_state.completed_actions:
-                st.session_state.completed_actions.append(i)
-        else:
-            if i in st.session_state.completed_actions:
-                st.session_state.completed_actions.remove(i)
-
-    st.markdown("---")
-    check_in = st.date_input(
-        "Check back in:",
-        value=datetime.strptime(
-            cs.get("check_in_date", (datetime.now() + timedelta(days=28)).strftime("%Y-%m-%d")),
-            "%Y-%m-%d",
-        ),
-        key="check_in_date_input",
-    )
-    st.session_state.coach_summary["check_in_date"] = check_in.strftime("%Y-%m-%d")
-    st.caption("Most people get the most out of CareerCraft with 2–4 CareerChecks over a few months.")
-
-    st.markdown("---")
-    st.markdown("## 📍 Things you can do in the next 4–6 weeks")
-    st.caption("Pick 1–2 that fit your reality. These become part of your sprint.")
-
-    opportunities = get_relevant_opportunities(career["id"])
-
-    st.markdown("### 📚 Courses & learning")
-    for opp in opportunities["courses"]:
-        is_selected = opp["id"] in st.session_state.selected_opportunities
-        col1, col2 = st.columns([4, 1])
-        with col1:
-            st.markdown(f"**{opp['title']}**")
-            st.caption(f"{opp['provider']} • {opp['duration']} • {opp['mode']} • {opp['cost']}")
-        with col2:
-            btn_label = "✓ Added" if is_selected else "+ Add"
-            btn_type = "primary" if is_selected else "secondary"
-            if st.button(btn_label, key=f"opp_{opp['id']}", type=btn_type):
-                if is_selected:
-                    st.session_state.selected_opportunities.remove(opp["id"])
-                else:
-                    st.session_state.selected_opportunities.append(opp["id"])
-                st.rerun()
-    if not opportunities["courses"]:
-        st.caption("No specific courses found for this example path yet.")
-
-    st.markdown("### 🎤 Networking & events")
-    for opp in opportunities["events"]:
-        is_selected = opp["id"] in st.session_state.selected_opportunities
-        col1, col2 = st.columns([4, 1])
-        with col1:
-            st.markdown(f"**{opp['title']}**")
-            st.caption(f"{opp['provider']} • {opp['date']} • {opp['mode']}")
-        with col2:
-            btn_label = "✓ Added" if is_selected else "+ Add"
-            btn_type = "primary" if is_selected else "secondary"
-            if st.button(btn_label, key=f"opp_{opp['id']}", type=btn_type):
-                if is_selected:
-                    st.session_state.selected_opportunities.remove(opp["id"])
-                else:
-                    st.session_state.selected_opportunities.append(opp["id"])
-                st.rerun()
-    if not opportunities["events"]:
-        st.caption("No upcoming events found for this example path yet.")
-
-    st.markdown("### 👥 Communities & groups")
-    for opp in opportunities["communities"]:
-        is_selected = opp["id"] in st.session_state.selected_opportunities
-        col1, col2 = st.columns([4, 1])
-        with col1:
-            st.markdown(f"**{opp['title']}**")
-            st.caption(f"{opp['provider']} • {opp['frequency']} • {opp['mode']}")
-        with col2:
-            btn_label = "✓ Added" if is_selected else "+ Add"
-            btn_type = "primary" if is_selected else "secondary"
-            if st.button(btn_label, key=f"opp_{opp['id']}", type=btn_type):
-                if is_selected:
-                    st.session_state.selected_opportunities.remove(opp["id"])
-                else:
-                    st.session_state.selected_opportunities.append(opp["id"])
-                st.rerun()
-    if not opportunities["communities"]:
-        st.caption("No community groups linked for this example path yet.")
-
-    if st.session_state.selected_opportunities:
-        st.success(
-            "**✅ Added to your sprint:** "
-            + ", ".join(
-                [
-                    next(
-                        (o["title"] for cat in OPPORTUNITIES.values() for o in cat if o["id"] == oid),
-                        oid,
-                    )
-                    for oid in st.session_state.selected_opportunities
-                ]
-            )
+    if query:
+        st.markdown(
+            f"- [Search Eventbrite](https://www.eventbrite.com.au/d/online/{query.replace(' ', '-')}/)\n"
+            f"- [Search LinkedIn Learning](https://www.linkedin.com/learning/search?keywords={query.replace(' ', '%20')})\n"
+            f"- [Search Google](https://www.google.com/search?q={query.replace(' ', '+')})",
+            unsafe_allow_html=False,
         )
 
-    st.markdown("---")
-    st.markdown("## 💬 Quick feedback (helps us improve)")
+    # Save minimal session data
+    payload = {
+        "timestamp_utc": datetime.utcnow().isoformat(),
+        "entry_mode": entry_mode,
+        "skill_scores": st.session_state.get("skill_scores"),
+        "curious_role": st.session_state.get("curious_role"),
+        "career_current": st.session_state.get("career_current"),
+        "career_targets": st.session_state.get("career_targets"),
+        "career_pulls": st.session_state.get("career_pulls"),
+        "direction_label": direction_label,
+        "strengths": strengths,
+        "gap": gap,
+    }
+    save_session(payload)
 
-    st.session_state.feedback_rating = st.slider(
-        "How helpful was this CareerCheck today?",
-        1,
-        5,
-        st.session_state.feedback_rating or 4,
-    )
-    st.session_state.feedback_comment = st.text_input(
-        "Anything you would like us to do differently next time?",
-        value=st.session_state.feedback_comment,
-    )
 
-    st.markdown("---")
-    st.markdown("## 🔗 Share this & set your next CareerCheck")
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.markdown("**1. Share with someone you trust**")
-        if st.button("📋 Generate shareable summary", use_container_width=True):
-            cs = st.session_state.coach_summary
-            summary = f"""🧭 My CareerCraft Summary
-
-📍 6–12 MONTH DIRECTION:
-{cs.get('direction_6_12m', '')}
-
-📅 THIS 3-MONTH PHASE: {cs.get('phase_3m', {}).get('name', '')}
-{cs.get('phase_3m', {}).get('goal', '')}
-
-🏃 NEXT 4-WEEK SPRINT:
-{cs.get('sprint_4w', {}).get('title', '')}
-
-Actions:
-{chr(10).join(['• ' + a for a in cs.get('sprint_4w', {}).get('actions', [])])}
-
-📆 Next CareerCheck: {cs.get('check_in_date', '')}
-
-Questions for us to talk about:
-• What do you see in me that this report missed?
-• Does this direction feel realistic from your perspective?
-• If we had to design one experiment for the next month, what would it be?
-"""
-            st.code(summary, language=None)
-            st.info("Copy the text above into an email or message to a mentor, friend, or counsellor.")
-
-    with col2:
-        st.markdown("**2. Drop this into your calendar**")
-        check_in_str = cs.get("check_in_date", "")
-        ics_snippet = f"""Title: CareerCraft Check-in
-Date: {check_in_str}
-Description:
-Review this CareerCheck, update skills, and decide on your next sprint.
-Bring your notes from any conversations you had about this plan.
-"""
-        st.code(ics_snippet, language=None)
-        st.caption("Copy this text into a new event in Google Calendar / Outlook on your check-in date.")
-
-        if st.button("✅ Confirm & save session", type="primary", use_container_width=True):
-            save_session()
-            st.success("Session saved. When you return, we will pick up from what you actually did, not just what you planned.")
-
-    st.markdown("---")
-    col1, col2 = st.columns(2)
-    with col1:
-        data = collect_data()
-        st.download_button(
-            "📥 Export session JSON",
-            json.dumps(data, indent=2),
-            f"careercraft_{st.session_state.session_id}.json",
-            "application/json",
-        )
-    with col2:
-        st.caption("Next version will let you log in and see all your past CareerChecks in one place.")
-
-# =============================================================================
-# ADMIN PANEL
-# =============================================================================
-
-def render_admin():
-    st.markdown("# 📊 Admin analytics")
-
-    sessions = []
-    for f in DATA_DIR.glob("*.json"):
-        try:
-            with open(f) as file:
-                sessions.append(json.load(file))
-        except Exception:
-            pass
-
-    if not sessions:
-        st.warning("No sessions collected yet.")
-        return
-
-    col1, col2, col3, col4 = st.columns(4)
-
-    with col1:
-        st.metric("Total sessions", len(sessions))
-    with col2:
-        completed = sum(1 for s in sessions if s.get("completed_assessment"))
-        st.metric("Completed assessment", completed)
-    with col3:
-        had_chat = sum(1 for s in sessions if s.get("had_conversation"))
-        st.metric("Had AI conversation", had_chat)
-    with col4:
-        set_exp = sum(1 for s in sessions if s.get("set_experiment"))
-        st.metric("Set experiment", set_exp)
-
-    st.markdown("---")
-
-    st.markdown("### Popular careers")
-    careers_explored = {}
-    for s in sessions:
-        if s.get("career_title"):
-            careers_explored[s["career_title"]] = careers_explored.get(s["career_title"], 0) + 1
-
-    if careers_explored:
-        df = pd.DataFrame(list(careers_explored.items()), columns=["Career", "Count"])
-        st.bar_chart(df.set_index("Career"))
-
-    st.markdown("### Values mentioned")
-    all_values = {}
-    for s in sessions:
-        for v in s.get("values", {}).get("priorities", []):
-            all_values[v] = all_values.get(v, 0) + 1
-
-    if all_values:
-        df = pd.DataFrame(list(all_values.items()), columns=["Value", "Count"])
-        st.bar_chart(df.set_index("Value"))
-
-    st.markdown("---")
-    df_all = pd.DataFrame(sessions)
-    csv = df_all.to_csv(index=False)
-    st.download_button(
-        "📥 Export all sessions (CSV)",
-        csv,
-        "careercraft_all_sessions.csv",
-        "text/csv",
-    )
-
-# =============================================================================
-# MAIN ROUTER
-# =============================================================================
+# -------------------------
+# APP ENTRYPOINT
+# -------------------------
 
 def main():
-    # Admin mode via query parameter: ?admin=true
-    admin_flag = False
-    try:
-        qp = st.experimental_get_query_params()
-        raw = qp.get("admin")
-        if raw:
-            admin_flag = any(str(v).lower() == "true" for v in raw)
-    except Exception:
-        admin_flag = False
+    if "started" not in st.session_state:
+        st.session_state["started"] = False
+    if "flow_done" not in st.session_state:
+        st.session_state["flow_done"] = False
 
-    if admin_flag:
-        render_admin()
-        return
+    render_hero()
+    handle_start_message()
+    st.write("")
+    render_entry_cards()
 
-    screen = st.session_state.screen
+    if st.session_state["started"]:
+        st.write("---")
+        entry_mode = st.session_state.get("entry_mode")
+        if not entry_mode:
+            st.info("Choose how you want to start – from your skills or from a career.")
+        else:
+            if not st.session_state["flow_done"]:
+                if entry_mode == "skills":
+                    render_skills_flow()
+                else:
+                    render_career_flow()
+            else:
+                render_results_and_coach(entry_mode)
 
-    if screen == "landing":
-        render_landing()
-    elif screen == "skills":
-        render_skills_entry()
-    elif screen == "careers":
-        render_careers_entry()
-    elif screen == "directions":
-        render_directions()
-    elif screen == "report":
-        render_report()
-    elif screen == "wrapup":
-        render_wrapup()
-    else:
-        st.session_state.screen = "landing"
-        render_landing()
 
 if __name__ == "__main__":
     main()
