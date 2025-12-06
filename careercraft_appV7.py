@@ -1,3 +1,8 @@
+"""
+CareerCraft V7 - Streamlit Application
+Fixed version with correct model names and safe secrets access
+"""
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -5,8 +10,18 @@ import json
 import os
 from datetime import datetime
 
-import anthropic
-from openai import OpenAI
+# Optional imports - graceful fallback if not installed
+try:
+    import anthropic
+    ANTHROPIC_AVAILABLE = True
+except ImportError:
+    ANTHROPIC_AVAILABLE = False
+
+try:
+    from openai import OpenAI
+    OPENAI_AVAILABLE = True
+except ImportError:
+    OPENAI_AVAILABLE = False
 
 # -------------------------
 # PAGE CONFIG & GLOBAL STYLE
@@ -79,6 +94,11 @@ st.markdown(
         grid-template-columns: 1.3fr 1fr 1fr;
         gap: 1.2rem;
     }
+    @media (max-width: 768px) {
+        .hero-grid {
+            grid-template-columns: 1fr;
+        }
+    }
     .hero-pill-col-title {
         font-size: 0.82rem;
         text-transform: uppercase;
@@ -97,23 +117,6 @@ st.markdown(
         color: #9ca3af;
         margin-top: 0.9rem;
     }
-    .cc-primary-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0.7rem 1.4rem;
-        border-radius: 999px;
-        font-weight: 600;
-        border: none;
-        cursor: pointer;
-        background: linear-gradient(135deg, #f97316, #ec4899);
-        color: white !important;
-        box-shadow: 0 16px 30px rgba(236, 72, 153, 0.35);
-        font-size: 0.95rem;
-    }
-    .cc-primary-btn span {
-        margin-left: 0.4rem;
-    }
     .cc-secondary-text {
         font-size: 0.82rem;
         color: #6b7280;
@@ -124,6 +127,11 @@ st.markdown(
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 1.3rem;
+    }
+    @media (max-width: 768px) {
+        .entry-row {
+            grid-template-columns: 1fr;
+        }
     }
     .entry-card {
         background: #020617;
@@ -279,11 +287,25 @@ st.markdown(
         font-size: 0.9rem;
         color: #111827;
         margin-top: 0.45rem;
+        white-space: pre-wrap;
     }
     </style>
     """,
     unsafe_allow_html=True,
 )
+
+
+# -------------------------
+# HELPER: SAFE SECRETS ACCESS
+# -------------------------
+
+def get_secret(key: str, default=None):
+    """Safely get a secret from Streamlit secrets."""
+    try:
+        secrets_dict = dict(st.secrets)
+        return secrets_dict.get(key, default)
+    except Exception:
+        return default
 
 
 # -------------------------
@@ -297,55 +319,53 @@ def get_ai_coach_reply(prompt_text: str, user_context: dict) -> str:
     Falls back to a scripted response if no valid provider/key.
     """
 
-    provider = st.secrets.get("LLM_PROVIDER", "anthropic").lower()
-    anthropic_key = st.secrets.get("ANTHROPIC_API_KEY")
-    openai_key = st.secrets.get("OPENAI_API_KEY")
+    provider = get_secret("LLM_PROVIDER", "anthropic").lower()
+    anthropic_key = get_secret("ANTHROPIC_API_KEY")
+    openai_key = get_secret("OPENAI_API_KEY")
 
     def fallback_reply() -> str:
         strengths = ", ".join(user_context.get("top_strengths", [])) or "your existing strengths"
-        career = user_context.get("chosen_direction_label") or "the roles you are exploring"
+        career = user_context.get("chosen_direction_label") or user_context.get("direction_label") or "the roles you are exploring"
         main_gap = user_context.get("main_gap") or "one or two key skills"
         horizon = user_context.get("horizon_label", "the next 3–6 months")
 
         return (
             f"Here is how I would think about {horizon} from here:\n\n"
-            f"1. **Anchor in what already works.** {strengths} are not accidents – they are the "
+            f"**1. Anchor in what already works.** {strengths} are not accidents – they are the "
             f"foundation for any career move you make. Design your next steps so they keep showing up.\n\n"
-            f"2. **Treat {career} as a hypothesis, not a destiny.** Use the next phase to *test* whether "
+            f"**2. Treat {career} as a hypothesis, not a destiny.** Use the next phase to *test* whether "
             "the work, people, and problems in that direction feel right in practice.\n\n"
-            f"3. **Deliberate stretch.** Focus on {main_gap}. Choose one small project, habit, or commitment "
+            f"**3. Deliberate stretch.** Focus on {main_gap}. Choose one small project, habit, or commitment "
             "you can realistically sustain for 4–6 weeks that directly exercises that skill.\n\n"
-            "4. **Make it a shared conversation.** Take this report and your draft plan to a mentor, friend, "
+            "**4. Make it a shared conversation.** Take this report and your draft plan to a mentor, friend, "
             "or counsellor. Ask them: *What feels true? What feels off? What are we not seeing?*\n\n"
             "The goal is not to find a perfect plan, but to keep taking informed, low-risk steps that teach you "
             "more about what actually fits."
         )
 
+    system_msg = (
+        "You are a gentle but honest career coach. You help people turn structured assessments "
+        "into a realistic 3–6 month plan. You focus on experiments, conversations, and habits. "
+        "You do not promise specific salaries or guaranteed outcomes. You speak clearly and simply."
+    )
+    
+    user_msg = (
+        "Here is structured context about the user:\n"
+        f"{json.dumps(user_context, indent=2)}\n\n"
+        f"Here is what they just wrote:\n{prompt_text}\n\n"
+        "Give them: (1) what matters most right now, "
+        "(2) how to frame the next 3–6 months, "
+        "(3) 1–3 concrete, low-risk experiments they can run. "
+        "Keep it under 350 words. Use markdown formatting."
+    )
+
     # Anthropic / Claude
-    if provider == "anthropic" and anthropic_key:
+    if provider == "anthropic" and anthropic_key and ANTHROPIC_AVAILABLE:
         try:
             client = anthropic.Anthropic(api_key=anthropic_key)
-            system_msg = (
-                "You are a gentle but honest career coach. You help people turn structured assessments "
-                "into a realistic 3–6 month plan. You focus on experiments, conversations, and habits. "
-                "You do not promise specific salaries or guaranteed outcomes. You speak clearly and simply."
-            )
-            messages = [
-                {
-                    "role": "user",
-                    "content": (
-                        "Here is structured context about the user:\n"
-                        f"{json.dumps(user_context, indent=2)}\n\n"
-                        f"Here is what they just wrote:\n{prompt_text}\n\n"
-                        "Give them: (1) what matters most right now, "
-                        "(2) how to frame the next 3–6 months, "
-                        "(3) 1–3 concrete, low-risk experiments they can run. "
-                        "Keep it under 350 words."
-                    ),
-                }
-            ]
+            messages = [{"role": "user", "content": user_msg}]
             resp = client.messages.create(
-                model="claude-3-5-sonnet-latest",
+                model="claude-sonnet-4-20250514",  # FIXED: use current model
                 max_tokens=500,
                 temperature=0.5,
                 system=system_msg,
@@ -357,33 +377,16 @@ def get_ai_coach_reply(prompt_text: str, user_context: dict) -> str:
             return fallback_reply()
 
     # OpenAI / ChatGPT
-    if provider == "openai" and openai_key:
+    if provider == "openai" and openai_key and OPENAI_AVAILABLE:
         try:
-            os.environ["OPENAI_API_KEY"] = openai_key
-            client = OpenAI()
-            system_msg = (
-                "You are a thoughtful, evidence-aware career coach. "
-                "You help users turn an assessment into a 3–6 month plan with small experiments. "
-                "Avoid hype. Avoid guarantees. Be practical and encouraging."
-            )
+            client = OpenAI(api_key=openai_key)  # FIXED: pass key directly
             completion = client.chat.completions.create(
-                model="gpt-4.1-mini",
+                model="gpt-4o-mini",  # FIXED: correct model name
                 max_tokens=500,
                 temperature=0.6,
                 messages=[
                     {"role": "system", "content": system_msg},
-                    {
-                        "role": "user",
-                        "content": (
-                            "Here is structured context about the user:\n"
-                            f"{json.dumps(user_context, indent=2)}\n\n"
-                            f"Here is what they just wrote:\n{prompt_text}\n\n"
-                            "Give them: (1) what matters most right now, "
-                            "(2) how to think about the next 3–6 months, "
-                            "(3) 1–3 specific experiments to try. "
-                            "Keep it under 350 words."
-                        ),
-                    },
+                    {"role": "user", "content": user_msg},
                 ],
             )
             return completion.choices[0].message.content.strip()
@@ -391,7 +394,7 @@ def get_ai_coach_reply(prompt_text: str, user_context: dict) -> str:
             st.warning(f"OpenAI error – using fallback coach. ({e})")
             return fallback_reply()
 
-    # Fallback
+    # Fallback (no API keys or libraries)
     return fallback_reply()
 
 
@@ -453,7 +456,7 @@ def save_session(payload: dict):
 
 
 def compute_strengths_and_gaps(skill_scores: dict):
-    # skill_scores: {label: 0-100}
+    """Compute top strengths and main gap from skill scores."""
     if not skill_scores:
         return [], None
 
@@ -464,6 +467,7 @@ def compute_strengths_and_gaps(skill_scores: dict):
 
 
 def infer_direction(entry_mode: str, career_choice: str, strengths: list):
+    """Infer a direction label based on inputs."""
     if career_choice and career_choice != "Undecided / just exploring":
         direction_label = career_choice
     elif strengths:
@@ -475,6 +479,7 @@ def infer_direction(entry_mode: str, career_choice: str, strengths: list):
 
 
 def readiness_band(num_gaps: int):
+    """Return readiness label based on number of gaps."""
     if num_gaps <= 1:
         return "Ready"
     elif num_gaps <= 3:
@@ -527,42 +532,13 @@ def render_hero():
               </div>
             </div>
           </div>
-          <div style="display:flex; align-items:center; margin-top:1.5rem; gap:1rem;">
-            <button class="cc-primary-btn" id="cc-start-btn">
-              ✨ Start a CareerCheck<span>→</span>
-            </button>
-            <div class="cc-secondary-text">
-              No signup required. We will not promise your dream job in 30 days.
-            </div>
-          </div>
           <div class="hero-footnote">
             This is decision support, not prophecy. Use it as a conversation starter, not a verdict.
           </div>
         </div>
-        <script>
-        const btn = window.parent.document.getElementById('cc-start-btn');
-        if (btn) {
-            btn.addEventListener('click', function() {
-                window.parent.postMessage({type: 'cc-start'}, '*');
-            });
-        }
-        </script>
         """,
         unsafe_allow_html=True,
     )
-
-
-def handle_start_message():
-    # Streamlit cannot directly listen to postMessage; instead,
-    # we mirror the hero button with a normal Streamlit button for reliability.
-    st.session_state.setdefault("started", False)
-    st.session_state.setdefault("entry_mode", None)
-
-    # Hidden real button below hero
-    col1, col2, col3 = st.columns([2.2, 1, 1])
-    with col1:
-        if st.button("✨ Start a CareerCheck", use_container_width=True):
-            st.session_state["started"] = True
 
 
 def render_entry_cards():
@@ -598,13 +574,15 @@ def render_entry_cards():
 
     cols = st.columns(2)
     with cols[0]:
-        if st.button("Start from my skills →", use_container_width=True):
+        if st.button("🎯 Start from my skills →", use_container_width=True, type="primary"):
             st.session_state["started"] = True
             st.session_state["entry_mode"] = "skills"
+            st.rerun()
     with cols[1]:
-        if st.button("Start from a career →", use_container_width=True):
+        if st.button("🧭 Start from a career →", use_container_width=True, type="primary"):
             st.session_state["started"] = True
             st.session_state["entry_mode"] = "career"
+            st.rerun()
 
 
 def render_skills_flow():
@@ -617,29 +595,31 @@ def render_skills_flow():
     skill_scores = {}
     for group, skills in SKILL_GROUPS.items():
         st.markdown(f"**{group}**")
-        cols = st.columns(len(skills))
-        for col, skill in zip(cols, skills):
-            with col:
-                val = st.slider(
-                    skill,
-                    min_value=0,
-                    max_value=100,
-                    value=60,
-                    step=10,
-                    help="0 = almost never, 100 = this shows up most weeks",
-                )
-                skill_scores[skill] = val
+        for skill in skills:
+            val = st.slider(
+                skill,
+                min_value=0,
+                max_value=100,
+                value=60,
+                step=10,
+                help="0 = almost never, 100 = this shows up most weeks",
+                key=f"skill_{skill}",
+            )
+            skill_scores[skill] = val
         st.write("")
 
     curious_role = st.text_input(
         "If there is a role or direction you are curious about, write it here (optional):",
         placeholder="e.g. Product management in tech, community health, social impact consulting…",
+        key="curious_role_input",
     )
 
+    st.write("")
     if st.button("Generate my CareerCheck →", type="primary", use_container_width=True):
         st.session_state["skill_scores"] = skill_scores
         st.session_state["curious_role"] = curious_role
         st.session_state["flow_done"] = True
+        st.rerun()
 
 
 def render_career_flow():
@@ -652,28 +632,32 @@ def render_career_flow():
     current = st.selectbox(
         "Your current situation",
         ["Student", "Working in a job", "Between roles", "Something else / mixed"],
+        key="career_current_select",
     )
     target = st.multiselect(
         "Roles or directions you are considering",
         options=CAREER_OPTIONS,
         default=["Undecided / just exploring"],
         help="Pick 1–3 that feel relevant, even if you are not sure.",
+        key="career_target_select",
     )
 
     st.markdown("**Quick sense check – how do these feel right now?**")
     col1, col2, col3 = st.columns(3)
     with col1:
-        pull = st.slider("How strong is the pull towards these directions?", 0, 100, 70, 10)
+        pull = st.slider("How strong is the pull towards these directions?", 0, 100, 70, 10, key="pull_slider")
     with col2:
-        risk = st.slider("How risky would a move feel right now?", 0, 100, 50, 10)
+        risk = st.slider("How risky would a move feel right now?", 0, 100, 50, 10, key="risk_slider")
     with col3:
-        energy = st.slider("How much energy do you have for career changes?", 0, 100, 60, 10)
+        energy = st.slider("How much energy do you have for career changes?", 0, 100, 60, 10, key="energy_slider")
 
+    st.write("")
     if st.button("Generate my CareerCheck →", type="primary", use_container_width=True):
         st.session_state["career_current"] = current
         st.session_state["career_targets"] = target
         st.session_state["career_pulls"] = {"pull": pull, "risk": risk, "energy": energy}
         st.session_state["flow_done"] = True
+        st.rerun()
 
 
 def render_results_and_coach(entry_mode: str):
@@ -785,7 +769,7 @@ def render_results_and_coach(entry_mode: str):
         st.markdown(
             """
             <div class="coach-box">
-              <div class="coach-title">AI Career Coach</div>
+              <div class="coach-title">💬 AI Career Coach</div>
               <div class="coach-caption">
                 Use this to shape what you want to talk about with a mentor, friend, or counsellor.
               </div>
@@ -796,26 +780,32 @@ def render_results_and_coach(entry_mode: str):
         user_note = st.text_area(
             "Before you talk to someone, what feels most important, unclear, or scary about your career right now?",
             placeholder="Write a few sentences. This is just for you and the coach.",
+            key="coach_input",
         )
-        coach_reply = ""
-        if st.button("Ask the Career Coach →", use_container_width=True):
-            context = {
-                "entry_mode": entry_mode,
-                "direction_label": direction_label,
-                "top_strengths": strengths,
-                "main_gap": gap,
-                "horizon_label": horizon_label,
-            }
-            coach_reply = get_ai_coach_reply(user_note or "No extra note provided.", context)
-            st.session_state["coach_reply"] = coach_reply
+        
+        if st.button("Ask the Career Coach →", use_container_width=True, type="primary"):
+            if user_note.strip():
+                context = {
+                    "entry_mode": entry_mode,
+                    "direction_label": direction_label,
+                    "top_strengths": strengths,
+                    "main_gap": gap,
+                    "horizon_label": horizon_label,
+                }
+                with st.spinner("Thinking..."):
+                    coach_reply = get_ai_coach_reply(user_note, context)
+                st.session_state["coach_reply"] = coach_reply
+                st.rerun()
+            else:
+                st.warning("Please write something first so the coach can help.")
 
-        if not coach_reply:
-            coach_reply = st.session_state.get("coach_reply", "")
-
+        # Display coach reply if exists
+        coach_reply = st.session_state.get("coach_reply", "")
         if coach_reply:
             st.markdown(f'<div class="coach-box coach-reply">{coach_reply}</div>', unsafe_allow_html=True)
 
     # Summary + export
+    st.markdown("---")
     st.markdown('<div class="section-title">Step 3 · Turn this into a conversation</div>', unsafe_allow_html=True)
     st.markdown(
         """
@@ -847,13 +837,14 @@ def render_results_and_coach(entry_mode: str):
         "I would love to talk this through with you – what feels true, what feels off, and what "
         "we might be missing."
     )
-    st.text_area("Copy this into an email or message to a mentor/friend:", value=convo_text, height=150)
+    st.text_area("Copy this into an email or message to a mentor/friend:", value=convo_text, height=150, key="export_text")
 
     # Simple external search suggestions
     st.markdown("**Optional – find local courses or events**")
     query = st.text_input(
         "What would you like to search for near you?",
         placeholder="e.g. beginner product management course Melbourne, data meetups Sydney…",
+        key="search_query",
     )
     if query:
         st.markdown(
@@ -875,8 +866,18 @@ def render_results_and_coach(entry_mode: str):
         "direction_label": direction_label,
         "strengths": strengths,
         "gap": gap,
+        "coach_reply": st.session_state.get("coach_reply"),
     }
     save_session(payload)
+
+    # Reset button
+    st.markdown("---")
+    if st.button("Start a new CareerCheck", use_container_width=True):
+        for key in ["started", "entry_mode", "flow_done", "skill_scores", "curious_role", 
+                    "career_current", "career_targets", "career_pulls", "coach_reply"]:
+            if key in st.session_state:
+                del st.session_state[key]
+        st.rerun()
 
 
 # -------------------------
@@ -884,29 +885,38 @@ def render_results_and_coach(entry_mode: str):
 # -------------------------
 
 def main():
+    # Initialize session state
     if "started" not in st.session_state:
         st.session_state["started"] = False
     if "flow_done" not in st.session_state:
         st.session_state["flow_done"] = False
 
+    # Always show hero
     render_hero()
-    handle_start_message()
+    
     st.write("")
-    render_entry_cards()
 
-    if st.session_state["started"]:
-        st.write("---")
+    # If not started, show entry cards
+    if not st.session_state["started"]:
+        render_entry_cards()
+    else:
+        # Started - check entry mode
         entry_mode = st.session_state.get("entry_mode")
+        
         if not entry_mode:
-            st.info("Choose how you want to start – from your skills or from a career.")
-        else:
-            if not st.session_state["flow_done"]:
-                if entry_mode == "skills":
-                    render_skills_flow()
-                else:
-                    render_career_flow()
+            # Should not happen, but handle gracefully
+            render_entry_cards()
+        elif not st.session_state["flow_done"]:
+            # Show the appropriate flow
+            st.markdown("---")
+            if entry_mode == "skills":
+                render_skills_flow()
             else:
-                render_results_and_coach(entry_mode)
+                render_career_flow()
+        else:
+            # Show results
+            st.markdown("---")
+            render_results_and_coach(entry_mode)
 
 
 if __name__ == "__main__":
