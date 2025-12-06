@@ -1,7 +1,14 @@
 """
-CareerCraft V8 - Streamlit Application
-Direction → Phase → Sprint Structure
-Honest framing: Careers take months/years, sprints are the unit of action
+CareerCraft V7 - Streamlit Application
+
+Moat & Design:
+- Not "just a form" and not "ask an AI what to do with my life".
+- Tool you use BEFORE talking to a mentor/friend/counsellor.
+- Direction (6–12 months) → Phase (3 months) → Sprint (4 weeks).
+- Quantified: skills, match, salary range, ROI-ish uplift, readiness.
+- AI Career Coach as pre-conversation layer (values, constraints, language).
+- Local actions: courses, events, communities added into the sprint.
+- Data collected for learning (JSON files) + simple admin analytics.
 """
 
 import streamlit as st
@@ -127,11 +134,9 @@ OPPORTUNITIES = {
 
 st.markdown("""
 <style>
-    /* Hide Streamlit branding */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     
-    /* Hero gradient */
     .hero-gradient {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
         padding: 3rem 2rem;
@@ -152,7 +157,6 @@ st.markdown("""
         opacity: 0.9;
     }
     
-    /* Cards */
     .card {
         background: white;
         border-radius: 16px;
@@ -183,7 +187,6 @@ st.markdown("""
         border-radius: 12px;
     }
     
-    /* Chat bubbles */
     .chat-assistant {
         background: white;
         border: 1px solid #e5e7eb;
@@ -204,7 +207,6 @@ st.markdown("""
         text-align: right;
     }
     
-    /* Progress bar */
     .progress-bar {
         height: 8px;
         background: #e5e7eb;
@@ -219,7 +221,6 @@ st.markdown("""
         transition: width 0.5s;
     }
     
-    /* Stat cards */
     .stat-card {
         background: rgba(255,255,255,0.1);
         backdrop-filter: blur(10px);
@@ -241,7 +242,6 @@ st.markdown("""
         opacity: 0.8;
     }
     
-    /* Section headers */
     .section-label {
         font-size: 0.75rem;
         font-weight: 600;
@@ -355,7 +355,6 @@ def generate_coach_summary():
     values = st.session_state.values
     has_stability = "stability" in values["priorities"] or "money" in values["constraints"]
     
-    # Preserve existing long-term fields if present
     existing_vision = st.session_state.coach_summary.get("vision_12m", "")
     existing_check_in = st.session_state.coach_summary.get(
         "check_in_date",
@@ -414,10 +413,9 @@ Help them articulate values, constraints, and what success looks like. Keep resp
 
 Remember: Real career change takes months to years. You're helping them take small, deliberate steps - not promising transformation in weeks."""
     
-    # Try Anthropic API if available
     if ANTHROPIC_AVAILABLE:
         try:
-            api_key = dict(st.secrets).get("ANTHROPIC_API_KEY")
+            api_key = st.secrets.get("ANTHROPIC_API_KEY", None)
             if api_key:
                 client = Anthropic(api_key=api_key)
                 messages = [{"role": m["role"], "content": m["content"]} for m in st.session_state.chat_messages]
@@ -430,10 +428,8 @@ Remember: Real career change takes months to years. You're helping them take sma
                 )
                 return response.content[0].text
         except Exception:
-            # fall through to template responses
-            pass
+            pass  # fallback below
     
-    # Fallback responses (no external API)
     fallbacks = [
         f"That's insightful. It sounds like your goals really matter to you. What would success look like in 12 months if you were moving toward {career['title'] if career else 'your target role'}?",
         "Thanks for sharing. Career changes unfold over months, not weeks. What constraints are you working within right now – time, money, location, or something else?",
@@ -654,7 +650,6 @@ def render_careers_entry():
                 is_active = get_skill(skill) >= 60
                 btn_type = "primary" if is_active else "secondary"
                 if st.button(skill, key=f"quick_{skill}", type=btn_type, use_container_width=True):
-                    # Toggle between a "high" and "medium" value
                     st.session_state.skills[skill] = 30 if is_active else 75
                     st.rerun()
     
@@ -692,7 +687,6 @@ def render_directions():
     with col2:
         st.markdown("### 🧭 Career Directions")
         
-        # Deeper
         st.markdown("🟢 **Deeper in your lane**")
         if directions["deeper"]:
             for c in directions["deeper"]:
@@ -708,7 +702,6 @@ def render_directions():
         else:
             st.caption("Add more skills to see matches")
         
-        # Lateral
         st.markdown("🔵 **Lateral moves**")
         if directions["lateral"]:
             for c in directions["lateral"]:
@@ -724,7 +717,6 @@ def render_directions():
         else:
             st.caption("Add more skills")
         
-        # Stretch
         st.markdown("🟠 **Stretch paths**")
         if directions["stretch"]:
             for c in directions["stretch"]:
@@ -754,7 +746,6 @@ def render_report():
         st.session_state.screen = "directions"
         st.rerun()
     
-    # Header
     st.markdown(f"""
     <div class="hero-gradient">
         <div style="font-size: 3rem;">{career['icon']}</div>
@@ -777,7 +768,6 @@ def render_report():
     </div>
     """, unsafe_allow_html=True)
     
-    # Tabs
     tab1, tab2, tab3 = st.tabs(["📊 Overview", "📚 Learning", "💬 AI Coach"])
     
     with tab1:
@@ -816,14 +806,12 @@ def render_report():
         st.markdown("### 🤖 Career Coach")
         st.caption("Use this before you talk to someone about your next steps.")
         
-        # Chat history
         for msg in st.session_state.chat_messages:
             if msg["role"] == "assistant":
                 st.markdown(f'<div class="chat-assistant">{msg["content"]}</div>', unsafe_allow_html=True)
             else:
                 st.markdown(f'<div class="chat-user">{msg["content"]}</div>', unsafe_allow_html=True)
         
-        # Chat input
         user_input = st.text_input("Share what matters to you...", key="chat_input")
         
         col1, col2 = st.columns([3, 1])
@@ -840,7 +828,6 @@ def render_report():
                     save_session()
                     st.rerun()
         
-        # Quick prompts
         st.markdown("**Quick prompts:**")
         prompt_cols = st.columns(4)
         prompts = ["Growth matters most", "I need stability", "Time is limited", "Impact is key"]
@@ -857,7 +844,6 @@ def render_report():
                     save_session()
                     st.rerun()
         
-        # Values discovered
         if st.session_state.values["priorities"]:
             st.markdown("**🎯 What we've learned:**")
             st.markdown(" ".join([f"`{p}`" for p in st.session_state.values["priorities"]]))
@@ -884,7 +870,6 @@ def render_wrapup():
         generate_coach_summary()
         cs = st.session_state.coach_summary
     
-    # Header
     st.markdown("""
     <div class="card-green" style="padding: 2rem; border-radius: 16px; margin-bottom: 2rem;">
         <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
@@ -900,10 +885,8 @@ def render_wrapup():
     </div>
     """, unsafe_allow_html=True)
     
-    # Block 1: Your Path (Direction → Phase → Sprint)
     st.markdown("## 🧭 Your path and next sprint")
     
-    # 6-12 Month Direction
     st.markdown('<div class="card-purple"><div class="section-label section-label-purple">6-12 MONTH DIRECTION</div></div>', unsafe_allow_html=True)
     direction = st.text_area(
         "Direction",
@@ -917,5 +900,307 @@ def render_wrapup():
     
     st.markdown("")
     
-    # 3 Month Phase
-    st
+    st.markdown('<div class="card-blue"><div class="section-label section-label-blue">THIS 3-MONTH PHASE</div></div>', unsafe_allow_html=True)
+    phase_name = st.text_input(
+        "Phase name",
+        value=cs.get("phase_3m", {}).get("name", ""),
+        key="phase_name_input",
+        label_visibility="collapsed"
+    )
+    phase_goal = st.text_area(
+        "Phase goal",
+        value=cs.get("phase_3m", {}).get("goal", ""),
+        key="phase_goal_input",
+        label_visibility="collapsed",
+        height=68
+    )
+    
+    if phase_name != cs.get("phase_3m", {}).get("name"):
+        st.session_state.coach_summary["phase_3m"]["name"] = phase_name
+    if phase_goal != cs.get("phase_3m", {}).get("goal"):
+        st.session_state.coach_summary["phase_3m"]["goal"] = phase_goal
+    
+    st.markdown("")
+    
+    st.markdown('<div class="card-green"><div class="section-label section-label-green">NEXT 4-WEEK SPRINT</div></div>', unsafe_allow_html=True)
+    sprint_title = st.text_input(
+        "Sprint title",
+        value=cs.get("sprint_4w", {}).get("title", ""),
+        key="sprint_title_input",
+        label_visibility="collapsed"
+    )
+    
+    if sprint_title != cs.get("sprint_4w", {}).get("title"):
+        st.session_state.coach_summary["sprint_4w"]["title"] = sprint_title
+    
+    st.caption(cs.get("sprint_4w", {}).get("rationale", ""))
+    
+    st.markdown("**Actions:**")
+    actions = cs.get("sprint_4w", {}).get("actions", [])
+    for i, action in enumerate(actions):
+        is_completed = i in st.session_state.completed_actions
+        if st.checkbox(action, value=is_completed, key=f"action_{i}"):
+            if i not in st.session_state.completed_actions:
+                st.session_state.completed_actions.append(i)
+        else:
+            if i in st.session_state.completed_actions:
+                st.session_state.completed_actions.remove(i)
+    
+    st.markdown("---")
+    check_in = st.date_input(
+        "Check back in:",
+        value=datetime.strptime(
+            cs.get(
+                "check_in_date",
+                (datetime.now() + timedelta(days=28)).strftime("%Y-%m-%d")
+            ),
+            "%Y-%m-%d"
+        ),
+        key="check_in_date_input"
+    )
+    st.session_state.coach_summary["check_in_date"] = check_in.strftime("%Y-%m-%d")
+    st.caption("Over 3 months, each CareerCheck moves you toward your direction.")
+    
+    st.markdown("---")
+    st.markdown("## 🔭 Looking further ahead (optional)")
+    st.caption("If the next 3 months go well, what would you like to be true in 12 months?")
+    
+    vision = st.text_area(
+        "12-month vision",
+        value=cs.get("vision_12m", ""),
+        placeholder="e.g. Have 1 real PM-style project and 2 people who can vouch for me...",
+        key="vision_input",
+        label_visibility="collapsed"
+    )
+    if vision != cs.get("vision_12m"):
+        st.session_state.coach_summary["vision_12m"] = vision
+    
+    st.markdown("---")
+    st.markdown("## 📍 Things you can do in the next 4-6 weeks")
+    st.caption("Pick 1-2 that fit your reality. These add to your sprint.")
+    
+    opportunities = get_relevant_opportunities(career["id"])
+    
+    st.markdown("### 📚 Courses & Learning")
+    for opp in opportunities["courses"]:
+        is_selected = opp["id"] in st.session_state.selected_opportunities
+        col1, col2 = st.columns([4, 1])
+        with col1:
+            st.markdown(f"**{opp['title']}**")
+            st.caption(f"{opp['provider']} • {opp['duration']} • {opp['mode']} • {opp['cost']}")
+        with col2:
+            btn_label = "✓ Added" if is_selected else "+ Add"
+            btn_type = "primary" if is_selected else "secondary"
+            if st.button(btn_label, key=f"opp_{opp['id']}", type=btn_type):
+                if is_selected:
+                    st.session_state.selected_opportunities.remove(opp["id"])
+                else:
+                    st.session_state.selected_opportunities.append(opp["id"])
+                st.rerun()
+    
+    if not opportunities["courses"]:
+        st.caption("No specific courses found")
+    
+    st.markdown("### 🎤 Networking & Events")
+    for opp in opportunities["events"]:
+        is_selected = opp["id"] in st.session_state.selected_opportunities
+        col1, col2 = st.columns([4, 1])
+        with col1:
+            st.markdown(f"**{opp['title']}**")
+            st.caption(f"{opp['provider']} • {opp['date']} • {opp['mode']}")
+        with col2:
+            btn_label = "✓ Added" if is_selected else "+ Add"
+            btn_type = "primary" if is_selected else "secondary"
+            if st.button(btn_label, key=f"opp_{opp['id']}", type=btn_type):
+                if is_selected:
+                    st.session_state.selected_opportunities.remove(opp["id"])
+                else:
+                    st.session_state.selected_opportunities.append(opp["id"])
+                st.rerun()
+    
+    if not opportunities["events"]:
+        st.caption("No upcoming events found")
+    
+    st.markdown("### 👥 Communities & Groups")
+    for opp in opportunities["communities"]:
+        is_selected = opp["id"] in st.session_state.selected_opportunities
+        col1, col2 = st.columns([4, 1])
+        with col1:
+            st.markdown(f"**{opp['title']}**")
+            st.caption(f"{opp['provider']} • {opp['frequency']} • {opp['mode']}")
+        with col2:
+            btn_label = "✓ Added" if is_selected else "+ Add"
+            btn_type = "primary" if is_selected else "secondary"
+            if st.button(btn_label, key=f"opp_{opp['id']}", type=btn_type):
+                if is_selected:
+                    st.session_state.selected_opportunities.remove(opp["id"])
+                else:
+                    st.session_state.selected_opportunities.append(opp["id"])
+                st.rerun()
+    
+    if not opportunities["communities"]:
+        st.caption("No communities found")
+    
+    if st.session_state.selected_opportunities:
+        st.success(
+            "**✅ Added to your sprint:** "
+            + ", ".join([
+                next(
+                    (o["title"] for cat in OPPORTUNITIES.values() for o in cat if o["id"] == oid),
+                    oid
+                )
+                for oid in st.session_state.selected_opportunities
+            ])
+        )
+    
+    st.markdown("---")
+    st.markdown("## 🔗 Share this & set your next CareerCheck")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("**1. Share with someone you trust**")
+        if st.button("📋 Generate shareable summary", use_container_width=True):
+            cs = st.session_state.coach_summary
+            summary = f"""🧭 My CareerCraft Summary
+
+📍 6-12 MONTH DIRECTION:
+{cs.get('direction_6_12m', '')}
+
+📅 THIS 3-MONTH PHASE: {cs.get('phase_3m', {}).get('name', '')}
+{cs.get('phase_3m', {}).get('goal', '')}
+
+🏃 NEXT 4-WEEK SPRINT:
+{cs.get('sprint_4w', {}).get('title', '')}
+
+Actions:
+{chr(10).join(['• ' + a for a in cs.get('sprint_4w', {}).get('actions', [])])}
+
+📆 Next check-in: {cs.get('check_in_date', '')}
+"""
+            st.code(summary, language=None)
+            st.info("Copy the text above to share with a mentor, friend, or counsellor.")
+    
+    with col2:
+        st.markdown("**2. Confirm your check-in**")
+        if st.button(f"✅ Confirm: {check_in.strftime('%b %d, %Y')}", type="primary", use_container_width=True):
+            save_session()
+            st.success("Check-in confirmed. When you return, we'll ask: What did you do? How did it feel? What's next?")
+    
+    st.caption("Most people get the most out of CareerCraft with 2–4 CareerChecks over a few months. Each sprint builds on the last.")
+    
+    st.markdown("---")
+    col1, col2 = st.columns(2)
+    with col1:
+        data = collect_data()
+        st.download_button(
+            "📥 Export Session JSON",
+            json.dumps(data, indent=2),
+            f"careercraft_{st.session_state.session_id}.json",
+            "application/json"
+        )
+    with col2:
+        if st.button("← Back to Report"):
+            st.session_state.screen = "report"
+            st.rerun()
+
+# =============================================================================
+# ADMIN PANEL
+# =============================================================================
+
+def render_admin():
+    st.markdown("# 📊 Admin Analytics")
+    
+    sessions = []
+    for f in DATA_DIR.glob("*.json"):
+        try:
+            with open(f) as file:
+                sessions.append(json.load(file))
+        except Exception:
+            pass
+    
+    if not sessions:
+        st.warning("No sessions collected yet.")
+        return
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric("Total Sessions", len(sessions))
+    with col2:
+        completed = sum(1 for s in sessions if s.get("completed_assessment"))
+        st.metric("Completed Assessment", completed)
+    with col3:
+        had_chat = sum(1 for s in sessions if s.get("had_conversation"))
+        st.metric("Had AI Conversation", had_chat)
+    with col4:
+        set_exp = sum(1 for s in sessions if s.get("set_experiment"))
+        st.metric("Set Experiment", set_exp)
+    
+    st.markdown("---")
+    
+    st.markdown("### Popular Careers")
+    careers_explored = {}
+    for s in sessions:
+        if s.get("career_title"):
+            careers_explored[s["career_title"]] = careers_explored.get(s["career_title"], 0) + 1
+    
+    if careers_explored:
+        df = pd.DataFrame(list(careers_explored.items()), columns=["Career", "Count"])
+        st.bar_chart(df.set_index("Career"))
+    
+    st.markdown("### Values Mentioned")
+    all_values = {}
+    for s in sessions:
+        for v in s.get("values", {}).get("priorities", []):
+            all_values[v] = all_values.get(v, 0) + 1
+    
+    if all_values:
+        df = pd.DataFrame(list(all_values.items()), columns=["Value", "Count"])
+        st.bar_chart(df.set_index("Value"))
+    
+    st.markdown("---")
+    if sessions:
+        df = pd.DataFrame(sessions)
+        csv = df.to_csv(index=False)
+        st.download_button("📥 Export All Sessions (CSV)", csv, "careercraft_all_sessions.csv", "text/csv")
+
+# =============================================================================
+# MAIN ROUTER
+# =============================================================================
+
+def main():
+    # Admin mode via query parameter: ?admin=true
+    admin_flag = False
+    try:
+        qp = st.experimental_get_query_params()
+        raw = qp.get("admin")
+        if raw:
+            admin_flag = any(str(v).lower() == "true" for v in raw)
+    except Exception:
+        admin_flag = False
+    
+    if admin_flag:
+        render_admin()
+        return
+    
+    screen = st.session_state.screen
+    
+    if screen == "landing":
+        render_landing()
+    elif screen == "skills":
+        render_skills_entry()
+    elif screen == "careers":
+        render_careers_entry()
+    elif screen == "directions":
+        render_directions()
+    elif screen == "report":
+        render_report()
+    elif screen == "wrapup":
+        render_wrapup()
+    else:
+        st.session_state.screen = "landing"
+        render_landing()
+
+if __name__ == "__main__":
+    main()
