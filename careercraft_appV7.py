@@ -1,13 +1,14 @@
 """
 CareerCraft – Polished Streamlit App
-Beautiful UI with AI coach integration and data collection
+With ChatGPT/Claude integration buttons
 """
 
 import streamlit as st
 import json
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
+import urllib.parse
 
 # Optional LLM imports
 try:
@@ -31,7 +32,7 @@ st.set_page_config(
 )
 
 # =============================================================================
-# CUSTOM CSS - Polished warm aesthetic
+# CUSTOM CSS
 # =============================================================================
 
 st.markdown("""
@@ -59,7 +60,7 @@ st.markdown("""
     /* Hero */
     .hero-box {
         text-align: center;
-        padding: 2.5rem 1rem 2rem;
+        padding: 2rem 1rem 1.5rem;
         max-width: 700px;
         margin: 0 auto;
     }
@@ -112,6 +113,47 @@ st.markdown("""
         margin-top: 1.5rem;
     }
     
+    /* How it works steps */
+    .steps-container {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin: 2rem 0;
+        flex-wrap: wrap;
+    }
+    
+    .step-item {
+        text-align: center;
+        max-width: 200px;
+    }
+    
+    .step-number {
+        width: 40px;
+        height: 40px;
+        background: #4A6741;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Fraunces', serif;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin: 0 auto 0.75rem;
+    }
+    
+    .step-title {
+        font-weight: 600;
+        color: #1F2421;
+        margin-bottom: 0.25rem;
+    }
+    
+    .step-desc {
+        font-size: 0.85rem;
+        color: #6B7280;
+        line-height: 1.4;
+    }
+    
     /* Cards */
     .card {
         background: white;
@@ -143,7 +185,7 @@ st.markdown("""
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 1.25rem;
-        margin: 2rem 0;
+        margin: 1.5rem 0;
     }
     
     .entry-card {
@@ -155,9 +197,47 @@ st.markdown("""
     }
     
     .entry-icon { font-size: 2.5rem; margin-bottom: 1rem; }
-    .entry-title { font-family: 'Fraunces', serif; font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .entry-title { font-family: 'Fraunces', serif; font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem; color: white; }
     .entry-body { font-size: 0.9rem; color: #D1D5DB; line-height: 1.5; margin-bottom: 1rem; }
     .entry-cta { font-size: 0.85rem; color: #C75B39; font-weight: 500; }
+    
+    /* Integration banner */
+    .integration-banner {
+        background: linear-gradient(135deg, #E8EFE6, #F0F9FF);
+        border: 1px solid rgba(74, 103, 65, 0.2);
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        margin: 1.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .integration-text {
+        flex: 1;
+        font-size: 0.9rem;
+        color: #374151;
+    }
+    
+    .integration-logos {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    
+    .integration-logo {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+    }
+    
+    .logo-claude { background: #D97706; color: white; }
+    .logo-gpt { background: #10A37F; color: white; }
     
     /* Progress */
     .progress-box {
@@ -199,11 +279,11 @@ st.markdown("""
         margin-bottom: 0.4rem;
     }
     
-    .pill-sage { background: #E8EFE6; color: #4A6741; }
+    .pill-sage { background: #E8EFE6; color: #2D4A27; }
     .pill-ready { background: #DCFCE7; color: #166534; }
     .pill-stretch { background: #FEF3C7; color: #92400E; }
     
-    /* Direction cards */
+    /* Direction cards - FIXED COLORS */
     .dir-card {
         padding: 1rem 1.25rem;
         border-radius: 12px;
@@ -211,12 +291,41 @@ st.markdown("""
         border-left: 4px solid;
     }
     
-    .dir-deeper { background: #E8EFE6; border-color: #4A6741; }
-    .dir-lateral { background: #EFF6FF; border-color: #3B82F6; }
-    .dir-stretch { background: #FDEEE9; border-color: #C75B39; }
+    .dir-deeper { 
+        background: #E8EFE6; 
+        border-color: #4A6741; 
+    }
+    .dir-lateral { 
+        background: #EFF6FF; 
+        border-color: #3B82F6; 
+    }
+    .dir-stretch { 
+        background: #FEF3C7; 
+        border-color: #F59E0B; 
+    }
     
-    .dir-title { font-weight: 600; margin-bottom: 0.25rem; }
-    .dir-meta { font-size: 0.85rem; color: #4B5563; }
+    .dir-title { 
+        font-weight: 600; 
+        margin-bottom: 0.25rem; 
+        color: #1F2421;
+        font-size: 1rem;
+    }
+    .dir-meta { 
+        font-size: 0.9rem; 
+        color: #374151; 
+    }
+    
+    .match-badge {
+        display: inline-block;
+        padding: 0.15rem 0.5rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
+    
+    .match-ready { background: #DCFCE7; color: #166534; }
+    .match-stretch { background: #FEF3C7; color: #92400E; }
     
     /* Timeline */
     .timeline {
@@ -240,9 +349,8 @@ st.markdown("""
         position: relative;
         margin-bottom: 1.25rem;
         padding: 1rem;
-        background: white;
+        background: rgba(255,255,255,0.1);
         border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.04);
     }
     
     .tl-item::before {
@@ -267,28 +375,28 @@ st.markdown("""
         margin-bottom: 0.2rem;
     }
     
-    .tl-direction .tl-label { color: #4A6741; }
-    .tl-phase .tl-label { color: #3B82F6; }
-    .tl-sprint .tl-label { color: #C75B39; }
+    .tl-direction .tl-label { color: #86EFAC; }
+    .tl-phase .tl-label { color: #93C5FD; }
+    .tl-sprint .tl-label { color: #FCA5A5; }
     
     .tl-title {
         font-family: 'Fraunces', serif;
         font-size: 1rem;
-        color: #1F2421;
+        color: white;
     }
     
     .tl-body {
         font-size: 0.85rem;
-        color: #4B5563;
+        color: #D1D5DB;
         margin-top: 0.25rem;
     }
     
-    /* Coach */
+    /* Coach - FIXED */
     .coach-box {
         background: white;
         border-radius: 16px;
         padding: 1.5rem;
-        border: 1px solid rgba(0,0,0,0.06);
+        border: 1px solid rgba(0,0,0,0.08);
         margin-top: 1.5rem;
     }
     
@@ -297,21 +405,85 @@ st.markdown("""
         font-size: 1.1rem;
         font-weight: 600;
         margin-bottom: 0.5rem;
+        color: #1F2421;
     }
     
     .coach-sub {
         font-size: 0.85rem;
-        color: #4B5563;
+        color: #6B7280;
         margin-bottom: 1rem;
     }
     
     .coach-response {
-        background: #E8EFE6;
+        background: #F0FDF4;
+        border: 1px solid #BBF7D0;
         border-radius: 12px;
-        padding: 1rem 1.25rem;
+        padding: 1.25rem;
         font-size: 0.9rem;
-        line-height: 1.6;
+        line-height: 1.7;
         margin-top: 1rem;
+        color: #1F2421;
+    }
+    
+    /* AI Integration buttons */
+    .ai-buttons {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .ai-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    
+    .ai-btn-claude {
+        background: #D97706;
+        color: white;
+    }
+    
+    .ai-btn-claude:hover {
+        background: #B45309;
+        color: white;
+    }
+    
+    .ai-btn-gpt {
+        background: #10A37F;
+        color: white;
+    }
+    
+    .ai-btn-gpt:hover {
+        background: #0D8A6A;
+        color: white;
+    }
+    
+    /* Copy box */
+    .copy-box {
+        background: #F9FAFB;
+        border: 1px solid #E5E7EB;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-top: 1rem;
+        font-size: 0.85rem;
+        color: #374151;
+        line-height: 1.6;
+    }
+    
+    .copy-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #6B7280;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
     }
     
     /* Buttons */
@@ -327,23 +499,6 @@ st.markdown("""
     
     .stButton > button:hover {
         background: #3d5636 !important;
-    }
-    
-    div[data-testid="stHorizontalBlock"] .stButton > button {
-        width: 100%;
-    }
-    
-    /* Skill buttons custom */
-    .skill-btn-row {
-        display: flex;
-        gap: 0.5rem;
-        margin-bottom: 0.75rem;
-        align-items: center;
-    }
-    
-    .skill-label {
-        flex: 1;
-        font-size: 0.9rem;
     }
     
     /* Text areas */
@@ -364,10 +519,10 @@ st.markdown("""
 # =============================================================================
 
 SKILL_GROUPS = {
-    "Thinking": ["Problem solving", "Learning quickly", "Analytical thinking"],
-    "Technical": ["Working with data", "Digital tools", "Building systems"],
-    "People": ["Explaining ideas", "Supporting others", "Leading people"],
-    "Delivery": ["Finishing tasks", "Managing time", "Handling pressure"]
+    "🧠 Thinking": ["Problem solving", "Learning quickly", "Analytical thinking"],
+    "⚙️ Technical": ["Working with data", "Digital tools", "Building systems"],
+    "💬 People": ["Explaining ideas", "Supporting others", "Leading people"],
+    "🚀 Delivery": ["Finishing tasks", "Managing time", "Handling pressure"]
 }
 
 CAREERS = [
@@ -412,13 +567,31 @@ def get_strengths_and_gaps(skills):
 
 def get_readiness(gaps_count):
     if gaps_count <= 1:
-        return "Ready", "pill-ready"
+        return "Ready", "match-ready"
     elif gaps_count <= 3:
-        return "Stretch", "pill-stretch"
-    return "Long-shot", "pill-stretch"
+        return "Stretch", "match-stretch"
+    return "Long-shot", "match-stretch"
+
+def generate_ai_prompt(strengths, gaps, direction="Product Manager"):
+    """Generate a prompt users can paste into ChatGPT or Claude"""
+    return f"""I just completed a CareerCheck assessment. Here are my results:
+
+**My Strengths:** {', '.join(strengths) if strengths else 'Problem solving, Communication'}
+
+**My Growth Areas:** {', '.join(gaps) if gaps else 'Data skills, Technical tools'}
+
+**Direction I'm Exploring:** {direction}
+
+**My 4-Week Sprint:** Talk to 2 {direction}s, start 1 mini project, sample 1 course
+
+Can you help me:
+1. Think through whether this direction makes sense given my strengths
+2. Suggest specific ways to close my skill gaps
+3. Give me concrete next steps for my 4-week sprint
+4. Ask me questions to better understand my situation"""
 
 # =============================================================================
-# AI COACH
+# AI COACH (built-in)
 # =============================================================================
 
 def get_ai_response(user_msg, context):
@@ -453,7 +626,7 @@ Give them practical guidance."""
                 system=system,
                 messages=[{"role": "user", "content": user_prompt}]
             )
-            return resp.content[0].text.strip()
+            return resp.content[0].text.strip(), "claude"
         except Exception as e:
             pass
     
@@ -469,13 +642,13 @@ Give them practical guidance."""
                     {"role": "user", "content": user_prompt}
                 ]
             )
-            return resp.choices[0].message.content.strip()
+            return resp.choices[0].message.content.strip(), "openai"
         except:
             pass
     
     # Fallback
     strengths = ', '.join(context.get('strengths', ['your existing skills']))
-    return f"""Here's how I'd approach the next few months:
+    fallback = f"""Here's how I'd approach the next few months:
 
 **1. Build on what works.** {strengths} are your foundation—look for opportunities that use these daily.
 
@@ -486,6 +659,7 @@ Give them practical guidance."""
 **4. Talk it through.** Share this with someone you trust. Ask them: what feels right? What's missing?
 
 The goal isn't perfection—it's learning what actually fits you."""
+    return fallback, "fallback"
 
 # =============================================================================
 # SESSION STATE
@@ -497,6 +671,7 @@ if "step" not in st.session_state:
     st.session_state.entry_mode = None
     st.session_state.careers = []
     st.session_state.coach_response = None
+    st.session_state.coach_provider = None
     st.session_state.session_id = datetime.now().strftime("%Y%m%d%H%M%S")
 
 # =============================================================================
@@ -518,6 +693,28 @@ def render_landing():
     </div>
     """, unsafe_allow_html=True)
     
+    # How it works steps
+    st.markdown("""
+    <div class="steps-container">
+        <div class="step-item">
+            <div class="step-number">1</div>
+            <div class="step-title">Map your skills</div>
+            <div class="step-desc">Rate 12 skills across thinking, technical, people & delivery</div>
+        </div>
+        <div class="step-item">
+            <div class="step-number">2</div>
+            <div class="step-title">See your directions</div>
+            <div class="step-desc">Get 3 career paths with salary ranges and gap analysis</div>
+        </div>
+        <div class="step-item">
+            <div class="step-number">3</div>
+            <div class="step-title">Get your sprint</div>
+            <div class="step-desc">Leave with a 4-week experiment to test your hypothesis</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Entry cards
     st.markdown("""
     <div class="entry-grid">
         <div class="entry-card">
@@ -547,11 +744,23 @@ def render_landing():
             st.session_state.entry_mode = "career"
             st.rerun()
     
+    # Integration banner
+    st.markdown("""
+    <div class="integration-banner">
+        <div class="integration-text">
+            <strong>Continue the conversation:</strong> After your CareerCheck, take your results to ChatGPT or Claude for deeper exploration.
+        </div>
+        <div class="integration-logos">
+            <div class="integration-logo logo-claude">C</div>
+            <div class="integration-logo logo-gpt">G</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
     st.markdown('<p class="hero-note">No signup required. This is decision support, not prophecy.</p>', unsafe_allow_html=True)
 
 
 def render_skills():
-    # Progress
     answered = len(st.session_state.skills)
     total = sum(len(v) for v in SKILL_GROUPS.values())
     pct = int((answered / total) * 50) + 25
@@ -567,7 +776,6 @@ def render_skills():
     </div>
     """, unsafe_allow_html=True)
     
-    # Back button
     col1, col2 = st.columns([1, 4])
     with col1:
         if st.button("← Back"):
@@ -577,13 +785,12 @@ def render_skills():
     st.markdown("### Map your skills")
     st.markdown("How often does each skill show up in your work and life?")
     
-    # Skill inputs
     for group, skills in SKILL_GROUPS.items():
         st.markdown(f"**{group}**")
         for skill in skills:
             cols = st.columns([3, 1, 1, 1, 1])
             with cols[0]:
-                st.markdown(f"<div style='padding:0.5rem 0;'>{skill}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='padding:0.5rem 0; color:#1F2421;'>{skill}</div>", unsafe_allow_html=True)
             
             levels = [("Never", 20), ("Sometimes", 45), ("Often", 70), ("Weekly", 95)]
             for i, (label, val) in enumerate(levels):
@@ -595,7 +802,6 @@ def render_skills():
                         st.rerun()
         st.markdown("---")
     
-    # Continue
     if answered >= 4:
         if st.button("See my career directions →", type="primary", use_container_width=True):
             st.session_state.step = "results"
@@ -633,9 +839,9 @@ def render_career_select():
             card_class = "card-sage" if selected else "card"
             
             st.markdown(f"""
-            <div class="{card_class}" style="text-align:center; cursor:pointer;">
+            <div class="{card_class}" style="text-align:center; min-height:140px;">
                 <div style="font-size:2rem;">{career['icon']}</div>
-                <div style="font-weight:600;">{career['title']}</div>
+                <div style="font-weight:600; color:#1F2421;">{career['title']}</div>
                 <div style="font-size:0.85rem; color:#4B5563;">{career['range']}</div>
             </div>
             """, unsafe_allow_html=True)
@@ -677,7 +883,7 @@ def render_results():
     # Header
     st.markdown("""
     <div style="text-align:center; margin-bottom:2rem;">
-        <h2 style="font-family:'Fraunces',serif; font-size:1.75rem;">Your CareerCheck Results</h2>
+        <h2 style="font-family:'Fraunces',serif; font-size:1.75rem; color:#1F2421;">Your CareerCheck Results</h2>
         <p style="color:#4B5563;">Here's what we found based on your inputs</p>
     </div>
     """, unsafe_allow_html=True)
@@ -704,23 +910,23 @@ def render_results():
     
     st.markdown(f"""
     <div class="dir-card dir-deeper">
-        <div class="dir-title">🎯 Go deeper: Product Manager</div>
-        <div class="dir-meta">$95k–$180k • <span class="{readiness_class}" style="padding:0.2rem 0.5rem; border-radius:999px; font-size:0.75rem;">85% match</span></div>
+        <div class="dir-title">🎯 Go deeper: Product Manager <span class="match-badge match-ready">85% match</span></div>
+        <div class="dir-meta">$95k–$180k median salary</div>
     </div>
     <div class="dir-card dir-lateral">
-        <div class="dir-title">↔️ Lateral: Business Analyst</div>
-        <div class="dir-meta">$70k–$130k • <span class="pill-stretch" style="padding:0.2rem 0.5rem; border-radius:999px; font-size:0.75rem;">72% match</span></div>
+        <div class="dir-title">↔️ Lateral move: Business Analyst <span class="match-badge match-stretch">72% match</span></div>
+        <div class="dir-meta">$70k–$130k median salary</div>
     </div>
     <div class="dir-card dir-stretch">
-        <div class="dir-title">🚀 Stretch: Data Scientist</div>
-        <div class="dir-meta">$90k–$165k • <span class="pill-stretch" style="padding:0.2rem 0.5rem; border-radius:999px; font-size:0.75rem;">55% match</span></div>
+        <div class="dir-title">🚀 Stretch path: Data Scientist <span class="match-badge match-stretch">55% match</span></div>
+        <div class="dir-meta">$90k–$165k median salary</div>
     </div>
     """, unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # Timeline
+    # Timeline (dark card)
     st.markdown('<div class="card-dark">', unsafe_allow_html=True)
-    st.markdown("**Your Path**", unsafe_allow_html=True)
+    st.markdown("<p style='color:#9CA3AF; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:1rem;'>Your Path</p>", unsafe_allow_html=True)
     st.markdown("""
     <div class="timeline">
         <div class="tl-item tl-direction">
@@ -740,10 +946,10 @@ def render_results():
     """, unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # Coach
+    # Built-in Coach
     st.markdown('<div class="coach-box">', unsafe_allow_html=True)
     st.markdown('<div class="coach-header">💬 AI Career Coach</div>', unsafe_allow_html=True)
-    st.markdown('<div class="coach-sub">Shape your thinking before the real conversation</div>', unsafe_allow_html=True)
+    st.markdown('<div class="coach-sub">Get guidance here, or take your results to ChatGPT/Claude below</div>', unsafe_allow_html=True)
     
     user_input = st.text_area(
         "What feels most important, unclear, or scary about your career right now?",
@@ -761,16 +967,51 @@ def render_results():
                     "gaps": gaps,
                     "readiness": readiness
                 }
-                response = get_ai_response(user_input, context)
+                response, provider = get_ai_response(user_input, context)
                 st.session_state.coach_response = response
+                st.session_state.coach_provider = provider
             st.rerun()
     
     if st.session_state.coach_response:
+        provider_label = ""
+        if st.session_state.coach_provider == "claude":
+            provider_label = "🟠 Powered by Claude"
+        elif st.session_state.coach_provider == "openai":
+            provider_label = "🟢 Powered by ChatGPT"
+        
         st.markdown(f'<div class="coach-response">{st.session_state.coach_response}</div>', unsafe_allow_html=True)
+        if provider_label:
+            st.caption(provider_label)
     
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # Save & Reset
+    # Continue in ChatGPT/Claude section
+    st.markdown("---")
+    st.markdown("### 🚀 Continue the conversation")
+    st.markdown("Take your CareerCheck results to ChatGPT or Claude for deeper exploration:")
+    
+    # Generate the prompt
+    ai_prompt = generate_ai_prompt(strengths, gaps, "Product Manager")
+    
+    st.markdown(f"""
+    <div class="copy-box">
+        <div class="copy-label">Copy this prompt ↓</div>
+        {ai_prompt.replace(chr(10), '<br>')}
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Copy button and AI links
+    st.code(ai_prompt, language=None)
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.link_button("🟠 Open Claude →", "https://claude.ai/new", use_container_width=True)
+    with col2:
+        st.link_button("🟢 Open ChatGPT →", "https://chat.openai.com/", use_container_width=True)
+    
+    st.caption("1. Copy the prompt above  2. Click to open Claude or ChatGPT  3. Paste and continue your career exploration")
+    
+    # Save session
     save_session({
         "timestamp": datetime.utcnow().isoformat(),
         "entry_mode": st.session_state.entry_mode,
@@ -778,7 +1019,8 @@ def render_results():
         "careers": st.session_state.careers,
         "strengths": strengths,
         "gaps": gaps,
-        "coach_response": st.session_state.coach_response
+        "coach_response": st.session_state.coach_response,
+        "coach_provider": st.session_state.coach_provider
     })
     
     st.markdown("---")
@@ -794,15 +1036,13 @@ def render_results():
 # =============================================================================
 
 def main():
-    # Logo
     st.markdown("""
     <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem;">
-        <div style="width:32px; height:32px; background:#4A6741; border-radius:8px; display:flex; align-items:center; justify-content:center; color:white;">✧</div>
-        <span style="font-family:'Fraunces',serif; font-size:1.25rem; font-weight:600;">CareerCraft</span>
+        <div style="width:32px; height:32px; background:#4A6741; border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; font-size:1rem;">✧</div>
+        <span style="font-family:'Fraunces',serif; font-size:1.25rem; font-weight:600; color:#1F2421;">CareerCraft</span>
     </div>
     """, unsafe_allow_html=True)
     
-    # Route
     if st.session_state.step == "landing":
         render_landing()
     elif st.session_state.step == "skills":
