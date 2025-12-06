@@ -425,68 +425,7 @@ st.markdown("""
         color: #1F2421;
     }
     
-    /* AI Integration buttons */
-    .ai-buttons {
-        display: flex;
-        gap: 0.75rem;
-        margin-top: 1.5rem;
-        flex-wrap: wrap;
-    }
-    
-    .ai-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem 1.25rem;
-        border-radius: 10px;
-        font-size: 0.9rem;
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.2s;
-    }
-    
-    .ai-btn-claude {
-        background: #D97706;
-        color: white;
-    }
-    
-    .ai-btn-claude:hover {
-        background: #B45309;
-        color: white;
-    }
-    
-    .ai-btn-gpt {
-        background: #10A37F;
-        color: white;
-    }
-    
-    .ai-btn-gpt:hover {
-        background: #0D8A6A;
-        color: white;
-    }
-    
-    /* Copy box */
-    .copy-box {
-        background: #F9FAFB;
-        border: 1px solid #E5E7EB;
-        border-radius: 12px;
-        padding: 1rem;
-        margin-top: 1rem;
-        font-size: 0.85rem;
-        color: #374151;
-        line-height: 1.6;
-    }
-    
-    .copy-label {
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: #6B7280;
-        margin-bottom: 0.5rem;
-        font-weight: 600;
-    }
-    
-    /* Buttons */
+    /* Buttons - FIXED: Different styles for selected vs unselected */
     .stButton > button {
         background: #4A6741 !important;
         color: white !important;
@@ -501,6 +440,19 @@ st.markdown("""
         background: #3d5636 !important;
     }
     
+    /* Secondary buttons (skill options not selected) */
+    .stButton > button[kind="secondary"] {
+        background: white !important;
+        color: #374151 !important;
+        border: 1px solid #D1D5DB !important;
+        box-shadow: none !important;
+    }
+    
+    .stButton > button[kind="secondary"]:hover {
+        border-color: #4A6741 !important;
+        color: #4A6741 !important;
+    }
+    
     /* Text areas */
     .stTextArea textarea {
         border-radius: 12px !important;
@@ -510,6 +462,12 @@ st.markdown("""
     .stTextArea textarea:focus {
         border-color: #4A6741 !important;
         box-shadow: 0 0 0 1px #4A6741 !important;
+    }
+    
+    /* Link buttons */
+    .stLinkButton > a {
+        border-radius: 10px !important;
+        font-weight: 600 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -662,7 +620,7 @@ The goal isn't perfection—it's learning what actually fits you."""
     return fallback, "fallback"
 
 # =============================================================================
-# SESSION STATE
+# SESSION STATE - FIXED: Initialize all keys
 # =============================================================================
 
 if "step" not in st.session_state:
@@ -671,8 +629,12 @@ if "step" not in st.session_state:
     st.session_state.entry_mode = None
     st.session_state.careers = []
     st.session_state.coach_response = None
-    st.session_state.coach_provider = None
+    st.session_state.coach_provider = None  # FIXED: Initialize this
     st.session_state.session_id = datetime.now().strftime("%Y%m%d%H%M%S")
+
+# Ensure coach_provider exists (for existing sessions)
+if "coach_provider" not in st.session_state:
+    st.session_state.coach_provider = None
 
 # =============================================================================
 # SCREENS
@@ -793,13 +755,21 @@ def render_skills():
                 st.markdown(f"<div style='padding:0.5rem 0; color:#1F2421;'>{skill}</div>", unsafe_allow_html=True)
             
             levels = [("Never", 20), ("Sometimes", 45), ("Often", 70), ("Weekly", 95)]
+            current_value = st.session_state.skills.get(skill, 0)
+            
             for i, (label, val) in enumerate(levels):
                 with cols[i+1]:
-                    current = st.session_state.skills.get(skill, 0)
-                    btn_type = "primary" if current == val else "secondary"
-                    if st.button(label, key=f"{skill}_{val}", type=btn_type, use_container_width=True):
-                        st.session_state.skills[skill] = val
-                        st.rerun()
+                    # FIXED: Use different button types for selected vs not
+                    is_selected = current_value == val
+                    if is_selected:
+                        # Selected - show as primary (green)
+                        if st.button(f"✓ {label}", key=f"{skill}_{val}", type="primary", use_container_width=True):
+                            pass  # Already selected
+                    else:
+                        # Not selected - show as secondary (white)
+                        if st.button(label, key=f"{skill}_{val}", type="secondary", use_container_width=True):
+                            st.session_state.skills[skill] = val
+                            st.rerun()
         st.markdown("---")
     
     if answered >= 4:
@@ -846,7 +816,9 @@ def render_career_select():
             </div>
             """, unsafe_allow_html=True)
             
-            if st.button("Select" if not selected else "✓ Selected", key=f"c_{career['id']}", use_container_width=True):
+            btn_label = "✓ Selected" if selected else "Select"
+            btn_type = "primary" if selected else "secondary"
+            if st.button(btn_label, key=f"c_{career['id']}", use_container_width=True, type=btn_type):
                 if selected:
                     st.session_state.careers.remove(career["id"])
                 elif len(st.session_state.careers) < 3:
@@ -972,11 +944,13 @@ def render_results():
                 st.session_state.coach_provider = provider
             st.rerun()
     
+    # FIXED: Safe access to coach_provider
     if st.session_state.coach_response:
+        provider = st.session_state.get("coach_provider", "fallback")
         provider_label = ""
-        if st.session_state.coach_provider == "claude":
+        if provider == "claude":
             provider_label = "🟠 Powered by Claude"
-        elif st.session_state.coach_provider == "openai":
+        elif provider == "openai":
             provider_label = "🟢 Powered by ChatGPT"
         
         st.markdown(f'<div class="coach-response">{st.session_state.coach_response}</div>', unsafe_allow_html=True)
@@ -993,15 +967,9 @@ def render_results():
     # Generate the prompt
     ai_prompt = generate_ai_prompt(strengths, gaps, "Product Manager")
     
-    st.markdown(f"""
-    <div class="copy-box">
-        <div class="copy-label">Copy this prompt ↓</div>
-        {ai_prompt.replace(chr(10), '<br>')}
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Copy button and AI links
+    # Copy box
     st.code(ai_prompt, language=None)
+    st.caption("👆 Copy this prompt, then click a button below to open ChatGPT or Claude")
     
     col1, col2 = st.columns(2)
     with col1:
@@ -1009,9 +977,7 @@ def render_results():
     with col2:
         st.link_button("🟢 Open ChatGPT →", "https://chat.openai.com/", use_container_width=True)
     
-    st.caption("1. Copy the prompt above  2. Click to open Claude or ChatGPT  3. Paste and continue your career exploration")
-    
-    # Save session
+    # Save session - FIXED: Safe access
     save_session({
         "timestamp": datetime.utcnow().isoformat(),
         "entry_mode": st.session_state.entry_mode,
@@ -1019,8 +985,8 @@ def render_results():
         "careers": st.session_state.careers,
         "strengths": strengths,
         "gaps": gaps,
-        "coach_response": st.session_state.coach_response,
-        "coach_provider": st.session_state.coach_provider
+        "coach_response": st.session_state.get("coach_response"),
+        "coach_provider": st.session_state.get("coach_provider")
     })
     
     st.markdown("---")
