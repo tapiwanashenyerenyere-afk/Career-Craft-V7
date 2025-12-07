@@ -976,31 +976,20 @@ st.markdown("""
     /* Scroll animations */
     .scroll-fade {
         opacity: 0;
-        transform: translateY(30px);
-        animation: fadeInUp 0.8s ease forwards;
-        animation-timeline: view();
-        animation-range: entry 0% cover 30%;
+        transform: translateY(40px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
     }
     
-    @keyframes fadeInUp {
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    .scroll-fade.visible {
+        opacity: 1;
+        transform: translateY(0);
     }
     
-    /* Fallback for browsers without scroll-timeline */
-    @supports not (animation-timeline: view()) {
-        .scroll-fade {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
-        }
-        .scroll-fade.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+    /* Staggered animation delays for persona cards */
+    .persona-card.scroll-fade:nth-child(1) { transition-delay: 0s; }
+    .persona-card.scroll-fade:nth-child(2) { transition-delay: 0.15s; }
+    .persona-card.scroll-fade:nth-child(3) { transition-delay: 0.3s; }
+    .persona-card.scroll-fade:nth-child(4) { transition-delay: 0.45s; }
     
     .video-section {
         margin: 2rem 0;
@@ -1020,6 +1009,32 @@ st.markdown("""
         font-style: italic;
     }
 </style>
+<script>
+    // Scroll animation observer
+    function initScrollAnimations() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+        
+        document.querySelectorAll('.scroll-fade').forEach(el => {
+            observer.observe(el);
+        });
+    }
+    
+    // Run on load and after Streamlit rerenders
+    if (document.readyState === 'complete') {
+        initScrollAnimations();
+    } else {
+        window.addEventListener('load', initScrollAnimations);
+    }
+    
+    // Re-run periodically to catch dynamically added elements
+    setInterval(initScrollAnimations, 500);
+</script>
 """, unsafe_allow_html=True)
 
 # =============================================================================
@@ -1293,28 +1308,6 @@ def render_signup():
 # =============================================================================
 
 def render_home_landing():
-    # JavaScript for scroll animation fallback
-    st.markdown('''
-    <script>
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, { threshold: 0.1 });
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('.scroll-fade').forEach(el => observer.observe(el));
-        });
-        
-        // Re-run on Streamlit rerender
-        setTimeout(() => {
-            document.querySelectorAll('.scroll-fade').forEach(el => observer.observe(el));
-        }, 100);
-    </script>
-    ''', unsafe_allow_html=True)
-    
     # Hero
     st.markdown('''
     <div class="hero">
@@ -1754,56 +1747,73 @@ def render_usecases():
     
     st.markdown('''
     <div class="about-body" style="text-align: center; max-width: 560px; margin: 0 auto 2rem;">
-        Career transitions are deeply personal. Our research identified four distinct segments - each with different needs, constraints, and definitions of success. Maybe you'll see yourself in one of them.
+        Career transitions are deeply personal. Our research identified four distinct segments - each with different needs, constraints, and definitions of success. Maybe you\'ll see yourself in one of them.
     </div>
     ''', unsafe_allow_html=True)
     
-    for persona in PERSONAS:
-        # Build constraints HTML
-        constraints_html = "".join([f'<div class="persona-constraint">{c}</div>' for c in persona["constraints"]])
+    # Render each persona separately for proper display
+    for i, persona in enumerate(PERSONAS):
+        # Card container with scroll animation
+        st.markdown(f'<div class="persona-card scroll-fade" style="animation-delay: {i * 0.15}s;">', unsafe_allow_html=True)
         
-        # Build stats HTML
-        stats_html = "".join([f'<span class="persona-stat">{s}</span>' for s in persona["stats"]])
-        
+        # Header
         st.markdown(f'''
-        <div class="persona-card">
-            <div class="persona-header">
-                <div>
-                    <div class="persona-name">{persona['name']}</div>
-                    <div class="persona-archetype">{persona['archetype']}</div>
-                </div>
-                <div class="persona-meta">
-                    <div class="persona-age">Age {persona['age']}</div>
-                    <div class="persona-stage">{persona['stage']}</div>
-                </div>
+        <div class="persona-header">
+            <div>
+                <div class="persona-name">{persona['name']}</div>
+                <div class="persona-archetype">{persona['archetype']}</div>
             </div>
-            
-            <div class="persona-story">{persona['story']}</div>
-            
-            <div class="persona-tension">
-                <div class="persona-tension-label">Current Tension</div>
-                <div class="persona-tension-text">{persona['tension']}</div>
+            <div class="persona-meta">
+                <div class="persona-age">Age {persona['age']}</div>
+                <div class="persona-stage">{persona['stage']}</div>
             </div>
-            
-            <div class="persona-section-label">Key Constraints</div>
-            <div style="margin-bottom: 1rem;">{constraints_html}</div>
-            
-            <div class="persona-jtbd">
-                <div class="persona-jtbd-label">What they need</div>
-                <div class="persona-jtbd-text">{persona['jtbd']}</div>
-            </div>
-            
-            <div class="persona-message">
-                <div class="persona-message-label">Message that resonates</div>
-                <div class="persona-message-text">"{persona['resonant_message']}"</div>
-            </div>
-            
-            <div class="persona-stats">{stats_html}</div>
         </div>
         ''', unsafe_allow_html=True)
+        
+        # Story
+        st.markdown(f'<div class="persona-story">{persona["story"]}</div>', unsafe_allow_html=True)
+        
+        # Tension box
+        st.markdown(f'''
+        <div class="persona-tension">
+            <div class="persona-tension-label">Current Tension</div>
+            <div class="persona-tension-text">{persona['tension']}</div>
+        </div>
+        ''', unsafe_allow_html=True)
+        
+        # Constraints
+        st.markdown('<div class="persona-section-label">Key Constraints</div>', unsafe_allow_html=True)
+        for constraint in persona["constraints"]:
+            st.markdown(f'<div class="persona-constraint">{constraint}</div>', unsafe_allow_html=True)
+        
+        # JTBD box
+        st.markdown(f'''
+        <div class="persona-jtbd">
+            <div class="persona-jtbd-label">What they need</div>
+            <div class="persona-jtbd-text">{persona['jtbd']}</div>
+        </div>
+        ''', unsafe_allow_html=True)
+        
+        # Resonant message
+        st.markdown(f'''
+        <div class="persona-message">
+            <div class="persona-message-label">Message that resonates</div>
+            <div class="persona-message-text">{persona['resonant_message']}</div>
+        </div>
+        ''', unsafe_allow_html=True)
+        
+        # Stats
+        st.markdown('<div class="persona-stats">', unsafe_allow_html=True)
+        for stat in persona["stats"]:
+            st.markdown(f'<span class="persona-stat">{stat}</span>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        # Close card
+        st.markdown('</div>', unsafe_allow_html=True)
     
+    # CTA
     st.markdown('''
-    <div class="cta-card">
+    <div class="cta-card scroll-fade">
         <div class="cta-title">See yourself here?</div>
         <div class="cta-body">Take CareerCheck and get clarity on your own situation. Join a community of people navigating similar challenges.</div>
     </div>
