@@ -961,6 +961,64 @@ st.markdown("""
     .stRadio > div {
         gap: 0.5rem;
     }
+    
+    /* Video styling */
+    .stVideo {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #e8e5e0;
+    }
+    
+    .stVideo video {
+        border-radius: 12px;
+    }
+    
+    /* Scroll animations */
+    .scroll-fade {
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeInUp 0.8s ease forwards;
+        animation-timeline: view();
+        animation-range: entry 0% cover 30%;
+    }
+    
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Fallback for browsers without scroll-timeline */
+    @supports not (animation-timeline: view()) {
+        .scroll-fade {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .scroll-fade.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .video-section {
+        margin: 2rem 0;
+    }
+    
+    .video-section-bottom {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e8e5e0;
+    }
+    
+    .video-caption {
+        text-align: center;
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 0.5rem;
+        font-style: italic;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -1235,6 +1293,29 @@ def render_signup():
 # =============================================================================
 
 def render_home_landing():
+    # JavaScript for scroll animation fallback
+    st.markdown('''
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.scroll-fade').forEach(el => observer.observe(el));
+        });
+        
+        // Re-run on Streamlit rerender
+        setTimeout(() => {
+            document.querySelectorAll('.scroll-fade').forEach(el => observer.observe(el));
+        }, 100);
+    </script>
+    ''', unsafe_allow_html=True)
+    
+    # Hero
     st.markdown('''
     <div class="hero">
         <div class="hero-badge">
@@ -1249,7 +1330,15 @@ def render_home_landing():
     </div>
     ''', unsafe_allow_html=True)
     
+    # First video - under hero
+    st.markdown('<div class="video-section scroll-fade">', unsafe_allow_html=True)
+    st.video("assets/Untitled_video_1.mp4")
+    st.markdown('<p class="video-caption">See how CareerCraft matches you to careers</p>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Data grid
     st.markdown('''
+    <div class="scroll-fade">
     <div class="data-grid">
         <div class="data-card">
             <div class="data-value">7</div>
@@ -1264,6 +1353,7 @@ def render_home_landing():
             <div class="data-label">AI Coaches</div>
         </div>
     </div>
+    </div>
     ''', unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1, 2, 1])
@@ -1275,6 +1365,63 @@ def render_home_landing():
             st.rerun()
     
     st.markdown('<p class="footer-note">No signup required to start.</p>', unsafe_allow_html=True)
+    
+    # Features section with scroll animation
+    st.markdown('''
+    <div class="scroll-fade" style="margin-top: 3rem;">
+        <div class="card">
+            <div class="card-title">What you'll get</div>
+            <div class="pitch-item">
+                <div class="pitch-num">1</div>
+                <div class="pitch-text"><strong>Personalized career matches</strong> based on your work style, not just your resume</div>
+            </div>
+            <div class="pitch-item">
+                <div class="pitch-num">2</div>
+                <div class="pitch-text"><strong>Real salary data</strong> from 800+ occupations so you know what to expect</div>
+            </div>
+            <div class="pitch-item">
+                <div class="pitch-num">3</div>
+                <div class="pitch-text"><strong>AI career coaches</strong> to help you think through your next move</div>
+            </div>
+            <div class="pitch-item">
+                <div class="pitch-num">4</div>
+                <div class="pitch-text"><strong>A 4-week action plan</strong> with concrete steps to get started</div>
+            </div>
+        </div>
+    </div>
+    ''', unsafe_allow_html=True)
+    
+    # Second video - bottom of page
+    st.markdown('''
+    <div class="video-section-bottom scroll-fade">
+        <div class="section-header">
+            <div class="card-title">Your results, explained</div>
+        </div>
+    </div>
+    ''', unsafe_allow_html=True)
+    
+    st.markdown('<div class="scroll-fade">', unsafe_allow_html=True)
+    st.video("assets/video_2.mp4")
+    st.markdown('<p class="video-caption">How we turn your answers into actionable insights</p>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Final CTA
+    st.markdown('''
+    <div class="scroll-fade">
+        <div class="cta-card" style="margin-top: 2rem;">
+            <div class="cta-title">Ready to find your path?</div>
+            <div class="cta-body">Takes 3 minutes. No signup required.</div>
+        </div>
+    </div>
+    ''', unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("Start CareerCheck", use_container_width=True, key="start_check_bottom"):
+            st.session_state.step = "questions"
+            st.session_state.question_idx = 0
+            st.session_state.answers = {}
+            st.rerun()
 
 def render_home_questions():
     idx = st.session_state.question_idx
