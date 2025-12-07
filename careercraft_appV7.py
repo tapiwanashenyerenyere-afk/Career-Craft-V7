@@ -973,23 +973,12 @@ st.markdown("""
         border-radius: 12px;
     }
     
-    /* Scroll animations */
+    /* Scroll animations - elements visible by default */
     .scroll-fade {
-        opacity: 0;
-        transform: translateY(40px);
-        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-    }
-    
-    .scroll-fade.visible {
         opacity: 1;
         transform: translateY(0);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
     }
-    
-    /* Staggered animation delays for persona cards */
-    .persona-card.scroll-fade:nth-child(1) { transition-delay: 0s; }
-    .persona-card.scroll-fade:nth-child(2) { transition-delay: 0.15s; }
-    .persona-card.scroll-fade:nth-child(3) { transition-delay: 0.3s; }
-    .persona-card.scroll-fade:nth-child(4) { transition-delay: 0.45s; }
     
     .video-section {
         margin: 2rem 0;
@@ -1210,32 +1199,6 @@ st.markdown("""
         color: #444;
     }
 </style>
-<script>
-    // Scroll animation observer
-    function initScrollAnimations() {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-        
-        document.querySelectorAll('.scroll-fade').forEach(el => {
-            observer.observe(el);
-        });
-    }
-    
-    // Run on load and after Streamlit rerenders
-    if (document.readyState === 'complete') {
-        initScrollAnimations();
-    } else {
-        window.addEventListener('load', initScrollAnimations);
-    }
-    
-    // Re-run periodically to catch dynamically added elements
-    setInterval(initScrollAnimations, 500);
-</script>
 """, unsafe_allow_html=True)
 
 # =============================================================================
@@ -1525,14 +1488,11 @@ def render_home_landing():
     ''', unsafe_allow_html=True)
     
     # First video - under hero
-    st.markdown('<div class="video-section scroll-fade">', unsafe_allow_html=True)
     st.video("Untitled video (1).mp4")
     st.markdown('<p class="video-caption">See how CareerCraft matches you to careers</p>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
     
     # Data grid
     st.markdown('''
-    <div class="scroll-fade">
     <div class="data-grid">
         <div class="data-card">
             <div class="data-value">7</div>
@@ -1547,7 +1507,6 @@ def render_home_landing():
             <div class="data-label">AI Coaches</div>
         </div>
     </div>
-    </div>
     ''', unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1, 2, 1])
@@ -1560,52 +1519,39 @@ def render_home_landing():
     
     st.markdown('<p class="footer-note">No signup required to start.</p>', unsafe_allow_html=True)
     
-    # Features section with scroll animation
+    # Features section
     st.markdown('''
-    <div class="scroll-fade" style="margin-top: 3rem;">
-        <div class="card">
-            <div class="card-title">What you'll get</div>
-            <div class="pitch-item">
-                <div class="pitch-num">1</div>
-                <div class="pitch-text"><strong>Personalized career matches</strong> based on your work style, not just your resume</div>
-            </div>
-            <div class="pitch-item">
-                <div class="pitch-num">2</div>
-                <div class="pitch-text"><strong>Real salary data</strong> from 800+ occupations so you know what to expect</div>
-            </div>
-            <div class="pitch-item">
-                <div class="pitch-num">3</div>
-                <div class="pitch-text"><strong>AI career coaches</strong> to help you think through your next move</div>
-            </div>
-            <div class="pitch-item">
-                <div class="pitch-num">4</div>
-                <div class="pitch-text"><strong>A 4-week action plan</strong> with concrete steps to get started</div>
-            </div>
+    <div class="card" style="margin-top: 1.5rem;">
+        <div class="card-title">What you'll get</div>
+        <div class="pitch-item">
+            <div class="pitch-num">1</div>
+            <div class="pitch-text"><strong>Personalised career matches</strong> based on your work style, not just your resume</div>
+        </div>
+        <div class="pitch-item">
+            <div class="pitch-num">2</div>
+            <div class="pitch-text"><strong>Real salary data</strong> from 800+ occupations so you know what to expect</div>
+        </div>
+        <div class="pitch-item">
+            <div class="pitch-num">3</div>
+            <div class="pitch-text"><strong>AI career coaches</strong> to help you think through your next move</div>
+        </div>
+        <div class="pitch-item">
+            <div class="pitch-num">4</div>
+            <div class="pitch-text"><strong>A 4-week action plan</strong> with concrete steps to get started</div>
         </div>
     </div>
     ''', unsafe_allow_html=True)
     
     # Second video - bottom of page
-    st.markdown('''
-    <div class="video-section-bottom scroll-fade">
-        <div class="section-header">
-            <div class="card-title">Your results, explained</div>
-        </div>
-    </div>
-    ''', unsafe_allow_html=True)
-    
-    st.markdown('<div class="scroll-fade">', unsafe_allow_html=True)
+    st.markdown('<div class="card-title" style="text-align: center; margin-top: 2rem;">Your results, explained</div>', unsafe_allow_html=True)
     st.video("VIDEO 1.mp4")
     st.markdown('<p class="video-caption">How we turn your answers into actionable insights</p>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
     
     # Final CTA
     st.markdown('''
-    <div class="scroll-fade">
-        <div class="cta-card" style="margin-top: 2rem;">
-            <div class="cta-title">Ready to find your path?</div>
-            <div class="cta-body">Takes 3 minutes. No signup required.</div>
-        </div>
+    <div class="cta-card" style="margin-top: 1.5rem;">
+        <div class="cta-title">Ready to find your path?</div>
+        <div class="cta-body">Takes 3 minutes. No signup required.</div>
     </div>
     ''', unsafe_allow_html=True)
     
@@ -1923,7 +1869,7 @@ def render_about():
     <div class="card">
         <div class="card-title">The team</div>
         <div class="about-body">
-            CareerCraft is built by AMARI Group. We're a small team obsessed with bringing quantitative rigor to decisions that have historically been made on intuition. We believe everyone deserves access to the same quality of career intelligence that elite universities and top consulting firms provide to a select few.
+            CareerCraft is built by JN Advisory Group. We're a small team obsessed with bringing quantitative rigor to decisions that have historically been made on intuition. We believe everyone deserves access to the same quality of career intelligence that elite universities and top consulting firms provide to a select few.
         </div>
     </div>
     ''', unsafe_allow_html=True)
@@ -1978,23 +1924,28 @@ def render_usecases():
     dots_html = "".join([f'<span class="dot {"active" if i == idx else ""}"></span>' for i in range(total)])
     st.markdown(f'<div class="dots-container">{dots_html}</div>', unsafe_allow_html=True)
     
-    # Main content card
+    # Main content card - broken into separate markdown calls
+    st.markdown('<div class="usecase-card">', unsafe_allow_html=True)
+    
+    # Header section
     st.markdown(f'''
-    <div class="usecase-card">
-        <div class="usecase-header">
-            <div class="usecase-name">{persona['name']}</div>
-            <div class="usecase-archetype">{persona['archetype']}</div>
-            <div class="usecase-meta">{persona['stage']} · Age {persona['age']}</div>
-        </div>
-        
-        <div class="usecase-problem">
-            <div class="usecase-label">The Problem</div>
-            <div class="usecase-problem-text">{persona['problem']}</div>
-        </div>
-        
-        <div class="usecase-story">{persona['story']}</div>
+    <div class="usecase-header">
+        <div class="usecase-name">{persona['name']}</div>
+        <div class="usecase-archetype">{persona['archetype']}</div>
+        <div class="usecase-meta">{persona['stage']} · Age {persona['age']}</div>
     </div>
     ''', unsafe_allow_html=True)
+    
+    # Problem section
+    st.markdown(f'<div class="usecase-problem">', unsafe_allow_html=True)
+    st.markdown(f'<div class="usecase-label">The Problem</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="usecase-problem-text">{persona["problem"]}</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Story
+    st.markdown(f'<div class="usecase-story">{persona["story"]}</div>', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)  # Close usecase-card
     
     # Pain points
     st.markdown('<div class="usecase-section">', unsafe_allow_html=True)
@@ -2004,20 +1955,16 @@ def render_usecases():
     st.markdown('</div>', unsafe_allow_html=True)
     
     # Solution - How CareerCraft helps
-    st.markdown(f'''
-    <div class="usecase-solution">
-        <div class="usecase-solution-label">How CareerCraft Helps</div>
-        <div class="usecase-solution-text">{persona['how_we_help']}</div>
-    </div>
-    ''', unsafe_allow_html=True)
+    st.markdown('<div class="usecase-solution">', unsafe_allow_html=True)
+    st.markdown('<div class="usecase-solution-label">How CareerCraft Helps</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="usecase-solution-text">{persona["how_we_help"]}</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
     
     # Outcome
-    st.markdown(f'''
-    <div class="usecase-outcome">
-        <div class="usecase-outcome-label">The Outcome</div>
-        <div class="usecase-outcome-text">{persona['outcome']}</div>
-    </div>
-    ''', unsafe_allow_html=True)
+    st.markdown('<div class="usecase-outcome">', unsafe_allow_html=True)
+    st.markdown('<div class="usecase-outcome-label">The Outcome</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="usecase-outcome-text">{persona["outcome"]}</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
     
     # Stats
     st.markdown('<div class="usecase-stats">', unsafe_allow_html=True)
