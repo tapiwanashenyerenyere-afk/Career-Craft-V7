@@ -140,61 +140,61 @@ CAREERS = [
     },
 ]
 
-# Research-backed personas
+# Personas - focused on problems CareerCraft solves
 PERSONAS = [
     {
         "id": "maya",
         "name": "Maya",
-        "archetype": "The Anxious Explorer",
+        "archetype": "The Undecided Graduate",
         "age": "19-22",
         "stage": "Student / Recent Grad",
-        "story": "Maya started uni during peak pandemic uncertainty, choosing business as a 'safe' major before realising it doesn't excite her. She's cycled through interests - psychology, design, marketing - without committing. Graduation approaches in 14 months and she feels paralysed by options, terrified of 'wasting' her degree.",
-        "tension": "Stuck between too many options. Wants something meaningful but fears picking wrong and disappointing her family.",
-        "constraints": [
-            "Pressure from family to get a 'stable' job quickly",
-            "Anxiety makes it hard to commit to one direction",
-            "Everyone seems to have it figured out except her",
-            "Limited work experience beyond casual jobs"
+        "problem": "Too many options, no clear direction",
+        "story": "Maya is finishing her business degree but isn't sure what career to pursue. She's interested in several fields but doesn't know which one suits her best or pays well.",
+        "pain_points": [
+            "Doesn't know which careers match her strengths",
+            "Can't compare salaries across different paths",
+            "Generic career quizzes haven't helped",
+            "No way to see what skills she should develop"
         ],
-        "need": "When I'm lying awake worrying about graduation, I want to understand what realistic career paths match my skills and interests, so I can stop feeling paralysed and start taking action.",
-        "resonant_message": "Stop spiraling through Reddit threads at 2am. Get a plan you can actually follow.",
-        "stats": ["42% of young people report mental health challenges", "75% change their major at least once", "67% need help with career decisions"]
+        "how_we_help": "CareerCraft matches Maya's strengths to real careers with actual salary data, shows her which skills to develop, and gives her a clear action plan.",
+        "outcome": "From confused to confident with a 4-week plan",
+        "stats": ["75% of students change their major", "67% need help with career decisions", "Only 27% feel prepared for job market"]
     },
     {
         "id": "darius",
         "name": "Darius",
-        "archetype": "The Ambitious Climber",
+        "archetype": "The Strategic Climber",
         "age": "26-30",
         "stage": "Early Career (3-5 years)",
-        "story": "Darius excelled academically and landed a solid corporate job after graduation. He's been promoted once and is earning $85K, but watches peers at other companies earning $120K+. He and his partner want to break into the property market within 2-3 years, which means significant salary growth or a strategic career move.",
-        "tension": "Knows he needs to either push for promotion, jump to a competitor, or shift to a higher-paying field. Each path has trade-offs he can't fully evaluate.",
-        "constraints": [
-            "Property prices keep rising faster than his savings",
-            "Partner's job limits where they can move",
-            "Bonus and shares tied to staying at current company",
-            "Doesn't want to start from the bottom in a new field"
+        "problem": "Wants to grow income but can't compare paths",
+        "story": "Darius earns $85K but sees peers earning $120K+. He wants to break into the property market but can't figure out whether to push for promotion, switch companies, or change fields entirely.",
+        "pain_points": [
+            "Can't compare earning potential across different moves",
+            "Doesn't know which skills would boost his salary most",
+            "No clear data on what top performers did differently",
+            "Making decisions based on guesswork and LinkedIn posts"
         ],
-        "need": "When I see peers getting promoted or jumping to better roles, I want to understand exactly what moves will grow my income over the next 5 years, so I can finally get into the property market.",
-        "resonant_message": "Model your next 5 years. Compare paths. Optimise for what actually matters to you.",
-        "stats": ["Median house price is 8x average income", "Average job tenure is now 3.2 years", "86% say purpose matters for job satisfaction"]
+        "how_we_help": "CareerCraft shows Darius exactly what each career path pays, which skills add the most value, and models his 5-year earning potential for each option.",
+        "outcome": "From guessing to data-driven career decisions",
+        "stats": ["Property prices are 8x average income", "Right skills can add $20K+ to salary", "Strategic moves double income growth rate"]
     },
     {
         "id": "rachel",
         "name": "Rachel",
-        "archetype": "The Burned-Out Reinventor",
+        "archetype": "The Career Pivoter",
         "age": "36-44",
         "stage": "Mid-Career (12-18 years)",
-        "story": "Rachel built a respectable career in corporate marketing, reaching Director level by her late 30s. COVID's remote work era showed her that work-life balance was possible - then return-to-office mandates and restructures brought burnout to a breaking point. She recently turned down a promotion because it meant more travel and stress.",
-        "tension": "Wants out of the corporate grind but can't afford to start over at entry level. Explored coaching, therapy, even counselling - but each path requires sacrificing either income or years of experience.",
-        "constraints": [
-            "Mortgage and family mean she needs at least $90K",
-            "Worried about age discrimination in job hunting",
-            "Two school-age kids limit time for retraining",
-            "Exhausted from current job with no energy for job searching"
+        "problem": "Wants to change careers without starting over",
+        "story": "Rachel is a Marketing Director who's ready for a change. She has valuable skills but doesn't know which industries would value them or how to transition without a huge pay cut.",
+        "pain_points": [
+            "Doesn't know where her skills transfer to",
+            "Worried about taking a pay cut to switch",
+            "Can't find realistic transition paths",
+            "Every option seems to require starting from scratch"
         ],
-        "need": "When I wake up dreading Monday again, I want to find a realistic path to work that's sustainable and meaningful, so I can stop feeling trapped and show my kids it's possible to love what you do.",
-        "resonant_message": "You've built skills. Let's figure out where they're valued - without starting over.",
-        "stats": ["Average career changer is 39 years old", "43% feel it's 'too late' to change", "35% cite burnout as their top concern"]
+        "how_we_help": "CareerCraft identifies which roles value Rachel's existing skills, shows realistic salary ranges for career changers, and maps out transition paths that preserve her income.",
+        "outcome": "From stuck to seeing a clear path forward",
+        "stats": ["Average career changer is 39", "73% of skills transfer across industries", "Targeted pivots maintain 85% of income"]
     },
     {
         "id": "emmanuel",
@@ -202,17 +202,17 @@ PERSONAS = [
         "archetype": "The New Australian",
         "age": "28-34",
         "stage": "Skilled Professional (5-10 years)",
-        "story": "Emmanuel moved to Australia six years ago with an accounting degree and three years of professional experience. Getting his qualifications recognised took longer than expected. He worked as a rideshare driver, then warehouse supervisor, while completing local certification. He's now a junior accountant earning 40% less than Australian-trained peers.",
-        "tension": "Feels stuck between the safety of his current path and the fear of missing out on higher-growth fields while he's still young enough to pivot.",
-        "constraints": [
-            "Visa conditions limit job flexibility",
-            "Sends money to family back home each month",
-            "Australian employers undervalue overseas experience",
-            "Small professional network in Australia"
+        "problem": "Overseas experience not recognised properly",
+        "story": "Emmanuel moved to Australia with an accounting degree and experience, but earns 40% less than local peers. He's unsure whether to keep climbing in accounting or pivot to a higher-growth field.",
+        "pain_points": [
+            "Australian employers undervalue his overseas experience",
+            "Doesn't know which local qualifications are worth getting",
+            "Can't tell if pivoting to tech would pay off",
+            "Limited network to get insider career advice"
         ],
-        "need": "When I see Australian-trained peers advancing faster despite less experience, I want to understand what qualifications, skills, and strategies will accelerate my career here.",
-        "resonant_message": "Your skills traveled with you. Let's make sure employers see them.",
-        "stats": ["Migrants earn 25% less on average", "17% of Australian business owners are migrants", "Recognition of overseas qualifications takes 2+ years"]
+        "how_we_help": "CareerCraft shows Emmanuel which credentials actually increase earnings, compares growth potential across fields, and identifies roles where international experience is valued.",
+        "outcome": "From undervalued to strategically positioned",
+        "stats": ["Migrants earn 25% less on average", "Right certifications close the gap by 60%", "17% of business owners are migrants"]
     },
 ]
 
@@ -1045,6 +1045,170 @@ st.markdown("""
     .persona-card {
         animation: slideIn 0.4s ease-out;
     }
+    
+    /* Use Cases - Tile-based design */
+    .tile-grid {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    /* Use case card */
+    .usecase-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        border: 1px solid #e8e5e0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    
+    .usecase-header {
+        margin-bottom: 1.25rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #f0ede8;
+    }
+    
+    .usecase-name {
+        font-family: 'Fraunces', serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 0.25rem;
+    }
+    
+    .usecase-archetype {
+        font-size: 1rem;
+        color: #4A6741;
+        font-weight: 600;
+        margin-bottom: 0.35rem;
+    }
+    
+    .usecase-meta {
+        font-size: 0.85rem;
+        color: #666;
+    }
+    
+    .usecase-problem {
+        background: #fff8f0;
+        border-left: 4px solid #e67e22;
+        padding: 1rem 1.25rem;
+        border-radius: 0 10px 10px 0;
+        margin-bottom: 1.25rem;
+    }
+    
+    .usecase-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 700;
+        color: #666;
+        margin-bottom: 0.5rem;
+    }
+    
+    .usecase-problem .usecase-label {
+        color: #d35400;
+    }
+    
+    .usecase-problem-text {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1a1a1a;
+        line-height: 1.4;
+    }
+    
+    .usecase-story {
+        font-size: 0.95rem;
+        color: #444;
+        line-height: 1.7;
+        margin-bottom: 1.25rem;
+    }
+    
+    .usecase-section {
+        margin-bottom: 1.25rem;
+    }
+    
+    .usecase-pain-point {
+        font-size: 0.9rem;
+        color: #444;
+        padding: 0.5rem 0 0.5rem 1.25rem;
+        position: relative;
+        border-bottom: 1px solid #f5f5f5;
+    }
+    
+    .usecase-pain-point:last-child {
+        border-bottom: none;
+    }
+    
+    .usecase-pain-point::before {
+        content: '✗';
+        position: absolute;
+        left: 0;
+        color: #e74c3c;
+        font-weight: 600;
+    }
+    
+    .usecase-solution {
+        background: linear-gradient(135deg, #e8f5e3 0%, #f0faf0 100%);
+        border-left: 4px solid #4A6741;
+        padding: 1rem 1.25rem;
+        border-radius: 0 10px 10px 0;
+        margin-bottom: 1rem;
+    }
+    
+    .usecase-solution-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 700;
+        color: #2d5a27;
+        margin-bottom: 0.5rem;
+    }
+    
+    .usecase-solution-text {
+        font-size: 0.95rem;
+        color: #1a1a1a;
+        line-height: 1.6;
+    }
+    
+    .usecase-outcome {
+        background: #1a1a1a;
+        padding: 1rem 1.25rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+    
+    .usecase-outcome-label {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 600;
+        color: #86efac;
+        margin-bottom: 0.35rem;
+    }
+    
+    .usecase-outcome-text {
+        font-family: 'Fraunces', serif;
+        font-size: 1.1rem;
+        color: #f5f5f5;
+        line-height: 1.4;
+    }
+    
+    .usecase-stats {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
+    
+    .usecase-stat {
+        background: #f8f8f6;
+        border: 1px solid #e8e5e0;
+        border-radius: 6px;
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
+        color: #444;
+    }
 </style>
 <script>
     // Scroll animation observer
@@ -1783,84 +1947,93 @@ def render_usecases():
     total = len(PERSONAS)
     persona = PERSONAS[idx]
     
-    # Progress indicator
-    progress_pct = int(((idx + 1) / total) * 100)
+    # Header
+    st.markdown('''
+    <div class="section-header">
+        <div class="section-title">Problems We Solve</div>
+        <div class="section-subtitle">Real challenges. Real solutions.</div>
+    </div>
+    ''', unsafe_allow_html=True)
+    
+    # Tile selector - 4 clickable tiles
+    st.markdown('<div class="tile-grid">', unsafe_allow_html=True)
+    
+    cols = st.columns(4)
+    for i, p in enumerate(PERSONAS):
+        with cols[i]:
+            is_active = i == idx
+            tile_class = "tile active" if is_active else "tile"
+            if st.button(
+                f"{p['name']}", 
+                key=f"tile_{p['id']}", 
+                use_container_width=True,
+                type="primary" if is_active else "secondary"
+            ):
+                st.session_state.persona_idx = i
+                st.rerun()
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Progress dots
+    dots_html = "".join([f'<span class="dot {"active" if i == idx else ""}"></span>' for i in range(total)])
+    st.markdown(f'<div class="dots-container">{dots_html}</div>', unsafe_allow_html=True)
+    
+    # Main content card
     st.markdown(f'''
-    <div class="progress-container">
-        <div class="progress-text">Story {idx + 1} of {total}</div>
-        <div class="progress-bar">
-            <div class="progress-fill" style="width: {progress_pct}%"></div>
+    <div class="usecase-card">
+        <div class="usecase-header">
+            <div class="usecase-name">{persona['name']}</div>
+            <div class="usecase-archetype">{persona['archetype']}</div>
+            <div class="usecase-meta">{persona['stage']} · Age {persona['age']}</div>
         </div>
-    </div>
-    ''', unsafe_allow_html=True)
-    
-    # Persona card with animation
-    st.markdown(f'''
-    <div class="persona-card scroll-fade visible" style="animation: slideIn 0.4s ease-out;">
-        <div class="persona-header">
-            <div>
-                <div class="persona-name">{persona['name']}</div>
-                <div class="persona-archetype">{persona['archetype']}</div>
-            </div>
-            <div class="persona-meta">
-                <div class="persona-age">Age {persona['age']}</div>
-                <div class="persona-stage">{persona['stage']}</div>
-            </div>
+        
+        <div class="usecase-problem">
+            <div class="usecase-label">The Problem</div>
+            <div class="usecase-problem-text">{persona['problem']}</div>
         </div>
+        
+        <div class="usecase-story">{persona['story']}</div>
     </div>
     ''', unsafe_allow_html=True)
     
-    # Story
-    st.markdown(f'<div class="persona-story">{persona["story"]}</div>', unsafe_allow_html=True)
+    # Pain points
+    st.markdown('<div class="usecase-section">', unsafe_allow_html=True)
+    st.markdown('<div class="usecase-label">What\'s Not Working</div>', unsafe_allow_html=True)
+    for point in persona["pain_points"]:
+        st.markdown(f'<div class="usecase-pain-point">{point}</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
     
-    # Tension box
+    # Solution - How CareerCraft helps
     st.markdown(f'''
-    <div class="persona-tension">
-        <div class="persona-tension-label">The Challenge</div>
-        <div class="persona-tension-text">{persona['tension']}</div>
+    <div class="usecase-solution">
+        <div class="usecase-solution-label">How CareerCraft Helps</div>
+        <div class="usecase-solution-text">{persona['how_we_help']}</div>
     </div>
     ''', unsafe_allow_html=True)
     
-    # Constraints
-    st.markdown('<div class="persona-section-label">What\'s Holding Them Back</div>', unsafe_allow_html=True)
-    for constraint in persona["constraints"]:
-        st.markdown(f'<div class="persona-constraint">{constraint}</div>', unsafe_allow_html=True)
-    
-    # What they need (was JTBD)
+    # Outcome
     st.markdown(f'''
-    <div class="persona-jtbd">
-        <div class="persona-jtbd-label">What They Need</div>
-        <div class="persona-jtbd-text">{persona['need']}</div>
-    </div>
-    ''', unsafe_allow_html=True)
-    
-    # Resonant message
-    st.markdown(f'''
-    <div class="persona-message">
-        <div class="persona-message-label">Message That Resonates</div>
-        <div class="persona-message-text">{persona['resonant_message']}</div>
+    <div class="usecase-outcome">
+        <div class="usecase-outcome-label">The Outcome</div>
+        <div class="usecase-outcome-text">{persona['outcome']}</div>
     </div>
     ''', unsafe_allow_html=True)
     
     # Stats
-    st.markdown('<div class="persona-stats">', unsafe_allow_html=True)
+    st.markdown('<div class="usecase-stats">', unsafe_allow_html=True)
     for stat in persona["stats"]:
-        st.markdown(f'<span class="persona-stat">{stat}</span>', unsafe_allow_html=True)
+        st.markdown(f'<span class="usecase-stat">{stat}</span>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # Navigation buttons
+    # Navigation arrows
     st.markdown("<br>", unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1, 2, 1])
     
     with col1:
         if idx > 0:
-            if st.button("Back", type="secondary", use_container_width=True, key="persona_back"):
+            if st.button("Previous", type="secondary", use_container_width=True, key="persona_prev"):
                 st.session_state.persona_idx -= 1
-                st.rerun()
-        else:
-            if st.button("Home", type="secondary", use_container_width=True, key="persona_home"):
-                navigate_to("home", "landing")
                 st.rerun()
     
     with col3:
@@ -1869,30 +2042,17 @@ def render_usecases():
                 st.session_state.persona_idx += 1
                 st.rerun()
         else:
-            if st.button("Get Started", use_container_width=True, key="persona_start"):
+            if st.button("Try It Free", use_container_width=True, key="persona_start"):
                 navigate_to("home", "landing")
                 st.rerun()
     
-    # Dots indicator
-    dots_html = ""
-    for i in range(total):
-        active = "active" if i == idx else ""
-        dots_html += f'<span class="dot {active}"></span>'
-    
-    st.markdown(f'''
-    <div class="dots-container">
-        {dots_html}
+    # CTA at end
+    st.markdown('''
+    <div class="cta-card" style="margin-top: 2rem;">
+        <div class="cta-title">Sound familiar?</div>
+        <div class="cta-body">Take the free CareerCheck assessment and get your personalised career matches in 3 minutes.</div>
     </div>
     ''', unsafe_allow_html=True)
-    
-    # See yourself prompt
-    if idx == total - 1:
-        st.markdown('''
-        <div class="cta-card" style="margin-top: 1.5rem;">
-            <div class="cta-title">See yourself in any of these stories?</div>
-            <div class="cta-body">Take CareerCheck and get clarity on your own situation.</div>
-        </div>
-        ''', unsafe_allow_html=True)
 
 # =============================================================================
 # MAIN
