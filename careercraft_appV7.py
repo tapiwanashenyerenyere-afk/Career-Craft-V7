@@ -1,12 +1,10 @@
 """
 CareerCraft – Career Intelligence Platform
-Landing page, About, and Use Cases with 4 research-backed personas
+Fixed: Navigation, HTML rendering, data section, button styling
 """
 
 import streamlit as st
-import json
 from datetime import datetime
-from pathlib import Path
 
 # Optional LLM imports
 try:
@@ -142,7 +140,7 @@ CAREERS = [
     },
 ]
 
-# Research-backed personas from UX Research documents
+# Research-backed personas
 PERSONAS = [
     {
         "id": "maya",
@@ -150,7 +148,6 @@ PERSONAS = [
         "archetype": "The Anxious Explorer",
         "age": "19-22",
         "stage": "Student / Recent Grad",
-        "location": "Urban university area",
         "story": "Maya started university during peak pandemic uncertainty, choosing business as a 'safe' major before realizing it doesn't excite her. She's cycled through interests - psychology, UX design, marketing - without committing. Graduation approaches in 14 months and she feels paralyzed by options, terrified of 'wasting' her degree.",
         "tension": "Stuck between too many options. Wants something meaningful but fears picking wrong and disappointing her family.",
         "constraints": [
@@ -159,22 +156,9 @@ PERSONAS = [
             "Mental health challenges (anxiety) affect follow-through",
             "Limited professional network beyond professors"
         ],
-        "behaviors": [
-            "Crowdsources advice on Reddit at 2am",
-            "Watches 'day in the life' YouTube videos",
-            "Took online career quizzes but didn't trust results",
-            "Started LinkedIn profile (only 40% complete)",
-            "Bookmarked Coursera courses but didn't finish any"
-        ],
         "jtbd": "When I'm lying awake worrying about graduation, I want to understand what realistic career paths match my skills and interests, so I can stop feeling paralyzed and start taking action.",
-        "blockers": "Analysis paralysis from too many options. Imposter syndrome when researching competitive fields. Tasks feel too big without breakdown.",
-        "trust_factors": "Shows data sources transparently. Doesn't feel like another personality quiz. Acknowledges uncertainty rather than false precision.",
         "resonant_message": "Stop spiraling through Reddit threads at 2am. Get a plan you can actually follow.",
-        "stats": [
-            "42% of Gen Z have been diagnosed with a mental health condition",
-            "75% of students change their major at least once",
-            "67% of first-year students say they need help making career decisions"
-        ]
+        "stats": ["42% of Gen Z have a mental health diagnosis", "75% change their major at least once", "67% need help with career decisions"]
     },
     {
         "id": "darius",
@@ -182,7 +166,6 @@ PERSONAS = [
         "archetype": "The Ambitious Climber",
         "age": "26-30",
         "stage": "Early Career (3-5 years)",
-        "location": "Major metro area",
         "story": "Darius excelled academically and landed a solid corporate job after graduation. He's been promoted once and is earning $85K, but watches peers at other companies pull $120K+. He and his partner want to buy property within 2-3 years, requiring significant salary growth or a strategic move.",
         "tension": "Knows he needs to either push for promotion, jump to a competitor, or shift to a higher-ceiling field. Each path has trade-offs he can't fully evaluate.",
         "constraints": [
@@ -191,22 +174,9 @@ PERSONAS = [
             "Golden handcuffs from unvested RSUs",
             "Doesn't want to restart at entry level in new field"
         ],
-        "behaviors": [
-            "Spreadsheet models comparing compensation scenarios",
-            "LinkedIn stalking of successful peers",
-            "Uses Blind app for salary transparency",
-            "Started preparing for PM interviews but abandoned",
-            "Networked with 3-4 contacts at target companies"
-        ],
-        "jtbd": "When I see peers getting promoted or jumping to better roles, I want to understand exactly what moves will maximize my earnings over the next 5 years, so I can hit my financial goals and feel confident I'm not leaving money on the table.",
-        "blockers": "Difficulty comparing apples-to-oranges career paths. Lack of time for deep skill-building while working full-time. Interview prep is daunting when unsure which direction to prepare for.",
-        "trust_factors": "Real wage data with percentiles and regional adjustments. Sophisticated analysis that respects his intelligence. Shows what top performers in his cohort have done.",
+        "jtbd": "When I see peers getting promoted or jumping to better roles, I want to understand exactly what moves will maximize my earnings over the next 5 years, so I can hit my financial goals.",
         "resonant_message": "Model your next 5 years. Compare paths. Optimize for what actually matters to you.",
-        "stats": [
-            "56% of early-career workers live paycheck-to-paycheck",
-            "Job tenure has dropped to 3.2 years for this cohort",
-            "86% say purpose is important to job satisfaction"
-        ]
+        "stats": ["56% live paycheck-to-paycheck", "Job tenure dropped to 3.2 years", "86% say purpose matters for satisfaction"]
     },
     {
         "id": "rachel",
@@ -214,32 +184,17 @@ PERSONAS = [
         "archetype": "The Burned-Out Reinventor",
         "age": "36-44",
         "stage": "Mid-Career (12-18 years)",
-        "location": "Suburban area near major city",
         "story": "Rachel built a respectable career in corporate marketing, reaching Director level by her late 30s. COVID's remote work revelation showed her that work-life balance was possible - then return-to-office mandates and layoffs brought burnout to a breaking point. She recently turned down a promotion because it meant more travel and stress.",
         "tension": "Wants out of the corporate grind but can't afford to start over at entry level. Explored coaching, therapy, even counseling school - but each path requires sacrificing either income or years of career capital.",
         "constraints": [
-            "Mortgage and family obligations create $90K minimum income floor",
+            "Mortgage and family create $90K minimum income floor",
             "Healthcare dependent on employment",
             "Age discrimination concerns",
-            "Two school-age children limit time for retraining",
-            "Caring duties for aging parent emerging"
+            "Two school-age children limit time for retraining"
         ],
-        "behaviors": [
-            "Took MBTI and StrengthsFinder (results didn't translate to action)",
-            "Completed one coaching session (expensive, unclear ROI)",
-            "Lurks in career transition communities",
-            "Updated LinkedIn but didn't activate 'open to work'",
-            "Browses job boards without applying"
-        ],
-        "jtbd": "When I wake up dreading Monday again, I want to find a realistic path to work that's sustainable and meaningful, so I can stop feeling trapped and show my kids that it's possible to love what you do.",
-        "blockers": "Every option seems to require giving up too much. Fear of making situation worse. Exhaustion from current job leaves no energy for job search.",
-        "trust_factors": "Acknowledges constraints rather than dismissing them. Shows salary data for pivot roles. Stories of people her age who succeeded. Doesn't feel like it's designed for 25-year-olds.",
+        "jtbd": "When I wake up dreading Monday again, I want to find a realistic path to work that's sustainable and meaningful, so I can stop feeling trapped and show my kids it's possible to love what you do.",
         "resonant_message": "You've built skills. Let's figure out where they're valued - without starting over.",
-        "stats": [
-            "Average career changer is 39 years old",
-            "43% say 'it's too late to change' holds them back",
-            "35% cite burnout as top career concern"
-        ]
+        "stats": ["Average career changer is 39", "43% say 'too late' holds them back", "35% cite burnout as top concern"]
     },
     {
         "id": "emmanuel",
@@ -247,32 +202,17 @@ PERSONAS = [
         "archetype": "The First-Gen Navigator",
         "age": "28-34",
         "stage": "Skilled Professional (5-10 years)",
-        "location": "Gateway city",
-        "story": "Emmanuel immigrated six years ago with an accounting degree and three years of professional experience. Credential recognition took longer than expected. He worked as a rideshare driver, then warehouse supervisor, while studying for CPA equivalency. He's now a junior accountant earning 40% less than domestic peers and is passed over for promotions.",
+        "story": "Emmanuel immigrated six years ago with an accounting degree and three years of professional experience. Credential recognition took longer than expected. He worked as a rideshare driver, then warehouse supervisor, while studying for CPA equivalency. He's now a junior accountant earning 40% less than domestic peers.",
         "tension": "Feels trapped between stability of current path (continue toward CPA, hope for promotion) and opportunity cost of not pivoting to tech or higher-growth fields while still young enough to learn.",
         "constraints": [
             "Immigration status limits job flexibility",
             "Sends $500/month to parents back home",
             "Credential recognition barriers devalue qualifications",
-            "Limited domestic professional network",
-            "Cultural navigation in corporate environments"
+            "Limited domestic professional network"
         ],
-        "behaviors": [
-            "Completed CPA equivalency requirements",
-            "LinkedIn profile carefully maintained",
-            "Applied to 50+ jobs in past year (most no response)",
-            "Attended professional association events",
-            "Started online course (didn't finish due to time constraints)"
-        ],
-        "jtbd": "When I see domestic peers advancing faster despite less experience, I want to understand what credentials, skills, and strategies will accelerate my career given my specific constraints, so I can build the secure future I immigrated for.",
-        "blockers": "Time poverty (works full-time, studies, family obligations). Unclear which investments will actually pay off. Difficulty getting informational interviews from cold outreach.",
-        "trust_factors": "Acknowledges specific constraints (visa, credential recognition). Shows pathways others with his background have taken. Provides concrete ROI on certifications.",
+        "jtbd": "When I see domestic peers advancing faster despite less experience, I want to understand what credentials, skills, and strategies will accelerate my career given my specific constraints.",
         "resonant_message": "Your skills traveled with you. Let's make sure employers see them.",
-        "stats": [
-            "First-gen households earn median $99,600 vs $135,800 for continuing-gen peers",
-            "17% of OECD self-employed are migrants",
-            "Nearly 1/3 of US workers lack foundational digital skills"
-        ]
+        "stats": ["First-gen earn $36K less median", "17% of self-employed are migrants", "1/3 lack foundational digital skills"]
     },
 ]
 
@@ -307,19 +247,20 @@ st.markdown("""
     }
     
     /* Navigation */
-    .nav-container {
+    .nav-row {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        padding: 0.75rem 0;
-        margin-bottom: 1rem;
+        gap: 1rem;
+        padding-bottom: 1rem;
         border-bottom: 1px solid #e8e5e0;
+        margin-bottom: 1.5rem;
     }
     
     .logo {
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        margin-right: auto;
     }
     
     .logo-mark {
@@ -370,15 +311,6 @@ st.markdown("""
     }
     
     /* Question */
-    .question-container {
-        animation: fadeUp 0.3s ease-out;
-    }
-    
-    @keyframes fadeUp {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
     .question-text {
         font-family: 'Fraunces', Georgia, serif;
         font-size: 1.5rem;
@@ -453,12 +385,12 @@ st.markdown("""
         border: 1px solid #e8e5e0;
     }
     
-    .card-header {
+    .card-title {
         font-family: 'Fraunces', serif;
         font-size: 1.1rem;
         font-weight: 600;
         color: #1a1a1a;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.75rem;
     }
     
     .card-body {
@@ -520,7 +452,6 @@ st.markdown("""
     
     .pill-green { background: #e8f5e3; color: #2d5a27; }
     .pill-amber { background: #fef3e2; color: #8a5a00; }
-    .pill-blue { background: #e8f4fd; color: #1d4ed8; }
     
     /* Direction cards */
     .direction-card {
@@ -689,7 +620,7 @@ st.markdown("""
         font-weight: 500;
     }
     
-    /* Persona cards - Enhanced */
+    /* Persona cards */
     .persona-card {
         background: white;
         border-radius: 16px;
@@ -782,10 +713,6 @@ st.markdown("""
         margin-top: 1rem;
     }
     
-    .persona-constraints {
-        margin-bottom: 1rem;
-    }
-    
     .persona-constraint {
         font-size: 0.85rem;
         color: #555;
@@ -868,19 +795,7 @@ st.markdown("""
         color: #555;
     }
     
-    /* About section */
-    .about-section {
-        margin: 1.5rem 0;
-    }
-    
-    .about-title {
-        font-family: 'Fraunces', serif;
-        font-size: 1.3rem;
-        font-weight: 600;
-        color: #1a1a1a;
-        margin-bottom: 0.75rem;
-    }
-    
+    /* About styles */
     .about-body {
         font-size: 0.95rem;
         color: #444;
@@ -891,60 +806,32 @@ st.markdown("""
     .pitch-item {
         display: flex;
         gap: 0.75rem;
-        margin-bottom: 1rem;
-        font-size: 0.9rem;
-        color: #2d2d2d;
-        line-height: 1.5;
+        margin-bottom: 1.1rem;
     }
     
     .pitch-num {
-        width: 24px;
-        height: 24px;
+        width: 26px;
+        height: 26px;
+        min-width: 26px;
         background: #4A6741;
         color: white;
         border-radius: 50%;
-        flex-shrink: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.75rem;
+        font-size: 0.8rem;
         font-weight: 600;
         margin-top: 0.1rem;
     }
     
-    .data-sources {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        margin-top: 1rem;
+    .pitch-text {
+        font-size: 0.9rem;
+        color: #2d2d2d;
+        line-height: 1.55;
     }
     
-    .data-source {
-        background: white;
-        border: 1px solid #e8e5e0;
-        border-radius: 6px;
-        padding: 0.4rem 0.75rem;
-        font-size: 0.75rem;
-        color: #555;
-    }
-    
-    /* Section header */
-    .section-header {
-        margin-bottom: 1.5rem;
-        text-align: center;
-    }
-    
-    .section-title {
-        font-family: 'Fraunces', serif;
-        font-size: 1.6rem;
-        font-weight: 700;
+    .pitch-text strong {
         color: #1a1a1a;
-        margin-bottom: 0.35rem;
-    }
-    
-    .section-subtitle {
-        font-size: 0.95rem;
-        color: #666;
     }
     
     /* Community card */
@@ -970,17 +857,70 @@ st.markdown("""
         line-height: 1.6;
     }
     
+    /* Section header */
+    .section-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .section-title {
+        font-family: 'Fraunces', serif;
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 0.35rem;
+    }
+    
+    .section-subtitle {
+        font-size: 0.95rem;
+        color: #666;
+    }
+    
+    /* CTA card */
+    .cta-card {
+        background: linear-gradient(135deg, #f5faf4 0%, #f0f7ff 100%);
+        border: 1px solid #e8e5e0;
+        border-radius: 12px;
+        padding: 1.25rem;
+        text-align: center;
+        margin: 1rem 0;
+    }
+    
+    .cta-title {
+        font-family: 'Fraunces', serif;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 0.35rem;
+    }
+    
+    .cta-body {
+        font-size: 0.9rem;
+        color: #555;
+        line-height: 1.5;
+    }
+    
+    /* Footer */
+    .footer-note {
+        text-align: center;
+        font-size: 0.75rem;
+        color: #888;
+        margin-top: 1.25rem;
+        font-style: italic;
+    }
+    
     /* Streamlit overrides */
     .stButton > button {
         background: #4A6741 !important;
         color: white !important;
         border: none !important;
         border-radius: 8px !important;
-        padding: 0.7rem 1.4rem !important;
+        padding: 0.6rem 1.2rem !important;
         font-weight: 600 !important;
         font-family: 'DM Sans', sans-serif !important;
-        box-shadow: 0 2px 8px rgba(74, 103, 65, 0.2) !important;
+        font-size: 0.9rem !important;
         transition: all 0.2s ease !important;
+        min-height: 42px !important;
     }
     
     .stButton > button:hover {
@@ -988,14 +928,16 @@ st.markdown("""
         transform: translateY(-1px) !important;
     }
     
-    .stButton > button[kind="secondary"] {
+    /* Secondary button style */
+    div[data-testid="column"]:has(button[kind="secondary"]) button,
+    .secondary-btn button {
         background: white !important;
         color: #2d2d2d !important;
         border: 1.5px solid #d1d1d1 !important;
-        box-shadow: none !important;
     }
     
-    .stButton > button[kind="secondary"]:hover {
+    div[data-testid="column"]:has(button[kind="secondary"]) button:hover,
+    .secondary-btn button:hover {
         border-color: #4A6741 !important;
         color: #4A6741 !important;
         background: #f5faf4 !important;
@@ -1015,12 +957,9 @@ st.markdown("""
         box-shadow: 0 0 0 1px #4A6741 !important;
     }
     
-    .footer-note {
-        text-align: center;
-        font-size: 0.75rem;
-        color: #888;
-        margin-top: 1.25rem;
-        font-style: italic;
+    /* Radio buttons */
+    .stRadio > div {
+        gap: 0.5rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -1158,156 +1097,145 @@ def check_api_status():
 
 if "page" not in st.session_state:
     st.session_state.page = "home"
+if "step" not in st.session_state:
     st.session_state.step = "landing"
+if "question_idx" not in st.session_state:
     st.session_state.question_idx = 0
+if "answers" not in st.session_state:
     st.session_state.answers = {}
+if "coach_response" not in st.session_state:
     st.session_state.coach_response = None
+if "coach_provider" not in st.session_state:
     st.session_state.coach_provider = None
+if "coach_error" not in st.session_state:
     st.session_state.coach_error = None
+if "show_signup" not in st.session_state:
     st.session_state.show_signup = False
 
 # =============================================================================
 # NAVIGATION
 # =============================================================================
 
+def navigate_to(page, step="landing"):
+    st.session_state.page = page
+    st.session_state.step = step
+    st.session_state.show_signup = False
+
 def render_nav():
-    col1, col2 = st.columns([1, 2])
+    st.markdown('''
+    <div class="logo" style="margin-bottom: 0.75rem;">
+        <div class="logo-mark">C</div>
+        <div class="logo-text">CareerCraft</div>
+    </div>
+    ''', unsafe_allow_html=True)
+    
+    col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.markdown("""
-        <div class="logo">
-            <div class="logo-mark">C</div>
-            <div class="logo-text">CareerCraft</div>
-        </div>
-        """, unsafe_allow_html=True)
+        if st.button("Home", key="nav_home", use_container_width=True,
+                    type="primary" if st.session_state.page == "home" and not st.session_state.show_signup else "secondary"):
+            navigate_to("home")
+            st.rerun()
     
     with col2:
-        cols = st.columns([1, 1, 1, 1])
-        with cols[0]:
-            if st.button("Home", key="nav_home", type="secondary" if st.session_state.page != "home" else "primary"):
-                st.session_state.page = "home"
-                st.session_state.step = "landing"
-                st.rerun()
-        with cols[1]:
-            if st.button("About", key="nav_about", type="secondary" if st.session_state.page != "about" else "primary"):
-                st.session_state.page = "about"
-                st.rerun()
-        with cols[2]:
-            if st.button("Use Cases", key="nav_usecases", type="secondary" if st.session_state.page != "usecases" else "primary"):
-                st.session_state.page = "usecases"
-                st.rerun()
-        with cols[3]:
-            if st.button("Sign up", key="nav_signup", type="secondary"):
-                st.session_state.show_signup = True
-                st.rerun()
+        if st.button("About", key="nav_about", use_container_width=True,
+                    type="primary" if st.session_state.page == "about" and not st.session_state.show_signup else "secondary"):
+            navigate_to("about")
+            st.rerun()
     
-    st.markdown("<hr style='margin: 0.5rem 0 1.5rem; border: none; border-top: 1px solid #e8e5e0;'>", unsafe_allow_html=True)
+    with col3:
+        if st.button("Use Cases", key="nav_usecases", use_container_width=True,
+                    type="primary" if st.session_state.page == "usecases" and not st.session_state.show_signup else "secondary"):
+            navigate_to("usecases")
+            st.rerun()
+    
+    with col4:
+        if st.button("Sign up", key="nav_signup", use_container_width=True,
+                    type="primary" if st.session_state.show_signup else "secondary"):
+            st.session_state.show_signup = True
+            st.rerun()
+    
+    st.markdown("<hr style='margin: 0.75rem 0 1.5rem; border: none; border-top: 1px solid #e8e5e0;'>", unsafe_allow_html=True)
 
 # =============================================================================
-# SIGNUP PAGE - Updated pitch
+# SIGNUP PAGE
 # =============================================================================
 
 def render_signup():
-    st.markdown("""
+    st.markdown('''
     <div class="section-header">
         <div class="section-title">Join CareerCraft</div>
         <div class="section-subtitle">Career intelligence powered by real data</div>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
     
-    # The pitch - Updated language
-    st.markdown("""
-    <div class="card" style="background: #f8f8f6;">
-        <div class="about-title">What you're joining</div>
-        
+    # The pitch - rendered properly
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown('<div class="card-title">What you\'re joining</div>', unsafe_allow_html=True)
+    
+    pitch_items = [
+        ("1", "Enterprise-grade data, not opinions.", "We integrate verified labor market data covering 1,016 occupations with 62,580 skill ratings, wage data from 800+ occupations, hiring records updated monthly, and educational outcomes by institution. The same data used by Fortune 500 companies and research institutions."),
+        ("2", "Skill-level ROI calculations.", "Most tools tell you a degree is 'worth it.' We calculate the specific wage premium for individual skills. Python adds ~$22,000/year. Project management adds ~$16,000. You see exactly what to learn and what it's worth."),
+        ("3", "Research-backed precision.", "Our matching uses hedonic wage regression, causal inference for treatment effects, and conformal prediction for uncertainty. This isn't a quiz - it's the same econometric rigor used in academic labor economics research."),
+        ("4", "Transparent algorithms.", "Every recommendation includes explanations showing exactly why. No black boxes. You can see the math, audit the logic, and understand exactly how we arrived at your results."),
+        ("5", "A community of career crafters.", "You're not navigating alone. Join thousands of professionals at every stage - from anxious explorers to ambitious climbers to seasoned reinventors - sharing insights, accountability, and real stories of transition."),
+        ("6", "Longitudinal tracking.", "Your profile persists. As you build skills and the market shifts, your recommendations update. Track your progress over time with version control for your career trajectory."),
+    ]
+    
+    for num, title, desc in pitch_items:
+        st.markdown(f'''
         <div class="pitch-item">
-            <div class="pitch-num">1</div>
-            <div><strong>Enterprise-grade data, not opinions.</strong> We integrate O*NET (1,016 occupations, 62,580 skill ratings), BLS wage data, JOLTS hiring records, and Census educational outcomes. Every recommendation is grounded in verified labor market data used by Fortune 500 companies and research institutions.</div>
+            <div class="pitch-num">{num}</div>
+            <div class="pitch-text"><strong>{title}</strong> {desc}</div>
         </div>
-        
-        <div class="pitch-item">
-            <div class="pitch-num">2</div>
-            <div><strong>Skill-level ROI calculations.</strong> Most tools tell you a degree is "worth it." We calculate the specific wage premium for individual skills. Python adds ~$22,000/year. Project management adds ~$16,000. You see exactly what to learn and what it's worth.</div>
-        </div>
-        
-        <div class="pitch-item">
-            <div class="pitch-num">3</div>
-            <div><strong>Research-backed precision.</strong> Our matching uses hedonic wage regression, causal inference for treatment effects, and conformal prediction for uncertainty. This isn't a quiz - it's the same econometric rigor used in academic labor economics research.</div>
-        </div>
-        
-        <div class="pitch-item">
-            <div class="pitch-num">4</div>
-            <div><strong>Transparent algorithms.</strong> Every recommendation comes with explanations showing why. No black boxes. You can see the math, audit the logic, and understand exactly how we arrived at your results.</div>
-        </div>
-        
-        <div class="pitch-item">
-            <div class="pitch-num">5</div>
-            <div><strong>A community of career crafters.</strong> You're not navigating alone. Join thousands of professionals at every stage - from anxious explorers to ambitious climbers to seasoned reinventors - sharing insights, accountability, and real stories of transition.</div>
-        </div>
-        
-        <div class="pitch-item">
-            <div class="pitch-num">6</div>
-            <div><strong>Longitudinal tracking.</strong> Your profile persists. As you build skills and the market shifts, your recommendations update. Track your progress over time with version control for your career trajectory.</div>
-        </div>
-        
-        <div style="margin-top: 1.25rem;">
-            <div style="font-size: 0.75rem; color: #666; margin-bottom: 0.5rem; font-weight: 600;">DATA SOURCES</div>
-            <div class="data-sources">
-                <span class="data-source">O*NET 30.0</span>
-                <span class="data-source">BLS OEWS</span>
-                <span class="data-source">BLS JOLTS</span>
-                <span class="data-source">Census PSEO</span>
-                <span class="data-source">BLS Projections</span>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+        ''', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
     
     # Community highlight
-    st.markdown("""
+    st.markdown('''
     <div class="community-card">
         <div class="community-title">Join the community</div>
         <div class="community-body">
             Connect with others on similar journeys. Our community includes students exploring their first career, early-career professionals optimizing for growth, mid-career pivoters seeking meaning, and skilled immigrants navigating new markets. Share wins, get accountability, find mentors.
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
     
     # Form
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    with st.form("signup_form"):
-        col1, col2 = st.columns(2)
-        with col1:
-            first_name = st.text_input("First name")
-        with col2:
-            last_name = st.text_input("Last name")
-        
-        email = st.text_input("Email address")
-        password = st.text_input("Create password", type="password")
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            submitted = st.form_submit_button("Create free account", use_container_width=True)
-        with col2:
-            if st.form_submit_button("Cancel", use_container_width=True, type="secondary"):
-                st.session_state.show_signup = False
-                st.rerun()
-        
-        if submitted and email and password:
-            st.success("Account created! Welcome to CareerCraft.")
-            st.session_state.show_signup = False
+    st.markdown('<div class="card">', unsafe_allow_html=True)
     
-    st.markdown("</div>", unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+    with col1:
+        first_name = st.text_input("First name", key="signup_first")
+    with col2:
+        last_name = st.text_input("Last name", key="signup_last")
+    
+    email = st.text_input("Email address", key="signup_email")
+    password = st.text_input("Create password", type="password", key="signup_pass")
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Create free account", key="signup_submit", use_container_width=True):
+            if email and password:
+                st.success("Account created! Welcome to CareerCraft.")
+                st.session_state.show_signup = False
+    with col2:
+        if st.button("Cancel", key="signup_cancel", use_container_width=True, type="secondary"):
+            st.session_state.show_signup = False
+            st.rerun()
+    
+    st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('<p class="footer-note">Free during beta. No credit card required.</p>', unsafe_allow_html=True)
 
 # =============================================================================
-# HOME PAGE (CareerCheck)
+# HOME PAGE
 # =============================================================================
 
 def render_home_landing():
-    st.markdown("""
+    st.markdown('''
     <div class="hero">
         <div class="hero-badge">
             <span class="hero-dot"></span>
@@ -1319,9 +1247,9 @@ def render_home_landing():
             Talk to AI coaches. Walk away with a 4-week plan.
         </p>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
     
-    st.markdown("""
+    st.markdown('''
     <div class="data-grid">
         <div class="data-card">
             <div class="data-value">7</div>
@@ -1336,11 +1264,11 @@ def render_home_landing():
             <div class="data-label">AI Coaches</div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("Start CareerCheck", use_container_width=True):
+        if st.button("Start CareerCheck", use_container_width=True, key="start_check"):
             st.session_state.step = "questions"
             st.session_state.question_idx = 0
             st.session_state.answers = {}
@@ -1354,27 +1282,23 @@ def render_home_questions():
     question = QUESTIONS[idx]
     
     progress_pct = int(((idx + 1) / total) * 100)
-    st.markdown(f"""
+    st.markdown(f'''
     <div class="progress-container">
         <div class="progress-text">Question {idx + 1} of {total}</div>
         <div class="progress-bar">
             <div class="progress-fill" style="width: {progress_pct}%"></div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
     
-    st.markdown(f"""
-    <div class="question-container">
-        <h2 class="question-text">{question['question']}</h2>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(f'<h2 class="question-text">{question["question"]}</h2>', unsafe_allow_html=True)
     
-    st.markdown(f"""
+    st.markdown(f'''
     <div class="scale-labels">
-        <span>{question['low_label']}</span>
-        <span>{question['high_label']}</span>
+        <span>{question["low_label"]}</span>
+        <span>{question["high_label"]}</span>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
     
     current_value = st.session_state.answers.get(question["id"], None)
     
@@ -1394,11 +1318,11 @@ def render_home_questions():
     
     with col1:
         if idx > 0:
-            if st.button("Back", type="secondary", use_container_width=True):
+            if st.button("Back", type="secondary", use_container_width=True, key="q_back"):
                 st.session_state.question_idx -= 1
                 st.rerun()
         else:
-            if st.button("Exit", type="secondary", use_container_width=True):
+            if st.button("Exit", type="secondary", use_container_width=True, key="q_exit"):
                 st.session_state.step = "landing"
                 st.rerun()
     
@@ -1407,11 +1331,11 @@ def render_home_questions():
         is_last = idx == total - 1
         
         if is_last:
-            if st.button("See results", disabled=not can_continue, use_container_width=True):
+            if st.button("See results", disabled=not can_continue, use_container_width=True, key="q_results"):
                 st.session_state.step = "results"
                 st.rerun()
         else:
-            if st.button("Next", disabled=not can_continue, use_container_width=True):
+            if st.button("Next", disabled=not can_continue, use_container_width=True, key="q_next"):
                 st.session_state.question_idx += 1
                 st.rerun()
 
@@ -1424,12 +1348,12 @@ def render_home_results():
     second_match = matches[1]
     third_match = matches[2]
     
-    st.markdown("""
+    st.markdown('''
     <div class="section-header">
         <div class="section-title">Your Results</div>
         <div class="section-subtitle">Based on your 7 answers</div>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
     with col1:
@@ -1449,7 +1373,7 @@ def render_home_results():
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown('<div class="result-label">Career Matches</div>', unsafe_allow_html=True)
     
-    st.markdown(f"""
+    st.markdown(f'''
     <div class="direction-card direction-primary">
         <div class="direction-type">Best match</div>
         <div class="direction-title">{top_match['career']['title']}</div>
@@ -1468,12 +1392,12 @@ def render_home_results():
         <div class="direction-meta">{third_match['career']['range']} | {third_match['career']['subtitle']}</div>
         <div class="direction-match">{third_match['match']}%</div>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
     # Timeline
     top_career = top_match['career']['title']
-    st.markdown(f"""
+    st.markdown(f'''
     <div class="timeline-card">
         <div class="timeline-header">Your 4-Week Sprint</div>
         <div class="timeline">
@@ -1491,7 +1415,7 @@ def render_home_results():
             </div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
     
     # AI Coaches
     st.markdown('<div class="coach-section">', unsafe_allow_html=True)
@@ -1512,7 +1436,7 @@ def render_home_results():
     
     user_input = st.text_area("Your question:", placeholder="What should I focus on first?", label_visibility="collapsed")
     
-    if st.button("Get advice"):
+    if st.button("Get advice", key="coach_btn"):
         if user_input.strip():
             context = f"Strengths: {', '.join(strengths)}. Growth areas: {', '.join(gaps)}. Exploring: {top_career}."
             with st.spinner("Thinking..."):
@@ -1548,10 +1472,12 @@ def render_home_results():
     st.markdown('</div>', unsafe_allow_html=True)
     
     # Save results CTA
-    st.markdown('<div class="card" style="text-align: center; background: linear-gradient(135deg, #f5faf4 0%, #f0f7ff 100%);">', unsafe_allow_html=True)
-    st.markdown('<div class="card-header">Save your results and join the community</div>', unsafe_allow_html=True)
-    st.markdown('<div class="card-body">Create an account to track progress, get updated recommendations, and connect with others on similar journeys.</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('''
+    <div class="cta-card">
+        <div class="cta-title">Save your results and join the community</div>
+        <div class="cta-body">Create an account to track progress, get updated recommendations, and connect with others on similar journeys.</div>
+    </div>
+    ''', unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
@@ -1559,7 +1485,7 @@ def render_home_results():
             st.session_state.show_signup = True
             st.rerun()
     
-    if st.button("Start over", type="secondary"):
+    if st.button("Start over", type="secondary", key="start_over"):
         st.session_state.step = "landing"
         st.session_state.answers = {}
         st.session_state.coach_response = None
@@ -1574,128 +1500,116 @@ def render_home():
         render_home_results()
 
 # =============================================================================
-# ABOUT PAGE - Updated language
+# ABOUT PAGE
 # =============================================================================
 
 def render_about():
-    st.markdown("""
+    st.markdown('''
     <div class="section-header">
         <div class="section-title">About CareerCraft</div>
         <div class="section-subtitle">Career intelligence, not career guessing</div>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
     
-    st.markdown("""
-    <div class="about-section">
-        <div class="about-body">
-            Most career advice is based on opinions, anecdotes, and gut feelings. We built CareerCraft because we believed career decisions deserve the same rigor as financial or medical decisions - grounded in data, transparent in methodology, and honest about uncertainty.
+    st.markdown('''
+    <div class="about-body">
+        Most career advice is based on opinions, anecdotes, and gut feelings. We built CareerCraft because we believed career decisions deserve the same rigor as financial or medical decisions - grounded in data, transparent in methodology, and honest about uncertainty.
+    </div>
+    ''', unsafe_allow_html=True)
+    
+    # What makes us different
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown('<div class="card-title">What makes us different</div>', unsafe_allow_html=True)
+    
+    diff_items = [
+        ("1", "Enterprise-grade data.", "We integrate verified labor market data covering 1,016 occupations with 62,580 skill ratings, wage data from 800+ occupations, hiring records updated monthly, and educational outcomes by institution. No surveys. No self-reported data. The same verified information used by Fortune 500 companies and research institutions."),
+        ("2", "Skill-level ROI.", "Everyone can tell you a CS degree has good ROI. We calculate the wage premium for individual skills: Python adds approximately $22,000 annually, project management adds $16,000, machine learning adds $35,000. You see exactly what to learn and what it's worth."),
+        ("3", "Research-backed methodology.", "Our matching uses hedonic wage regression (the same method labor economists use), causal inference for estimating treatment effects of career moves, and conformal prediction for honest uncertainty quantification. This isn't a personality quiz - it's the same quantitative rigor found in peer-reviewed academic research."),
+        ("4", "Transparent algorithms.", "Every recommendation includes explanations showing exactly why. No black boxes. If you want to see the math, you can. If you want to audit the logic, you can. We believe career decisions are too important for 'trust us.'"),
+        ("5", "A community that gets it.", "Career transitions are hard. You're not just navigating job markets - you're navigating identity, family expectations, financial constraints, and fear of the unknown. Our community connects you with others at every stage, from students to seasoned reinventors, sharing real stories and real accountability."),
+        ("6", "Longitudinal tracking.", "Your profile persists and evolves. As you build skills, as markets shift, as your priorities change - your recommendations update. Version control lets you see how your trajectory evolves over time."),
+    ]
+    
+    for num, title, desc in diff_items:
+        st.markdown(f'''
+        <div class="pitch-item">
+            <div class="pitch-num">{num}</div>
+            <div class="pitch-text"><strong>{title}</strong> {desc}</div>
+        </div>
+        ''', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Our data - FIXED: descriptions not source names
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown('<div class="card-title">Our data</div>', unsafe_allow_html=True)
+    st.markdown('<div class="about-body">Every number in CareerCraft comes from a verified source:</div>', unsafe_allow_html=True)
+    
+    st.markdown('''
+    <div class="data-grid">
+        <div class="data-card">
+            <div class="data-value" style="font-size: 1.1rem;">Occupations</div>
+            <div class="data-label">1,016 careers<br>62,580 skill ratings</div>
+        </div>
+        <div class="data-card">
+            <div class="data-value" style="font-size: 1.1rem;">Wages</div>
+            <div class="data-label">Salary data<br>800+ occupations</div>
+        </div>
+        <div class="data-card">
+            <div class="data-value" style="font-size: 1.1rem;">Hiring</div>
+            <div class="data-label">Job openings<br>Monthly updates</div>
+        </div>
+        <div class="data-card">
+            <div class="data-value" style="font-size: 1.1rem;">Education</div>
+            <div class="data-label">Graduate outcomes<br>By institution</div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
     
-    st.markdown("""
-    <div class="card">
-        <div class="about-title">What makes us different</div>
-        
-        <div class="pitch-item">
-            <div class="pitch-num">1</div>
-            <div><strong>Enterprise-grade data.</strong> We integrate O*NET (1,016 occupations with 62,580 skill ratings), BLS wage data from 800+ occupations, JOLTS hiring records updated monthly, and Census educational outcomes by institution. No surveys. No self-reported data. The same verified labor market data used by Fortune 500 companies and research institutions.</div>
-        </div>
-        
-        <div class="pitch-item">
-            <div class="pitch-num">2</div>
-            <div><strong>Skill-level ROI.</strong> Everyone can tell you a CS degree has good ROI. We calculate the wage premium for individual skills: Python adds approximately $22,000 annually, project management adds $16,000, machine learning adds $35,000. You see exactly what to learn and what it's worth.</div>
-        </div>
-        
-        <div class="pitch-item">
-            <div class="pitch-num">3</div>
-            <div><strong>Research-backed methodology.</strong> Our matching uses hedonic wage regression (the same method labor economists use), causal inference for estimating treatment effects of career moves, and conformal prediction for honest uncertainty quantification. This isn't a personality quiz - it's the same quantitative rigor found in peer-reviewed academic research.</div>
-        </div>
-        
-        <div class="pitch-item">
-            <div class="pitch-num">4</div>
-            <div><strong>Transparent algorithms.</strong> Every recommendation includes explanations showing exactly why. No black boxes. If you want to see the math, you can. If you want to audit the logic, you can. We believe career decisions are too important for "trust us."</div>
-        </div>
-        
-        <div class="pitch-item">
-            <div class="pitch-num">5</div>
-            <div><strong>A community that gets it.</strong> Career transitions are hard. You're not just navigating job markets - you're navigating identity, family expectations, financial constraints, and fear of the unknown. Our community connects you with others at every stage, from students to seasoned reinventors, sharing real stories and real accountability.</div>
-        </div>
-        
-        <div class="pitch-item">
-            <div class="pitch-num">6</div>
-            <div><strong>Longitudinal tracking.</strong> Your profile persists and evolves. As you build skills, as markets shift, as your priorities change - your recommendations update. Version control lets you see how your trajectory evolves over time.</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div class="card">
-        <div class="about-title">Our data sources</div>
-        <div class="about-body">Every number in CareerCraft comes from a verified source:</div>
-        <div class="data-grid">
-            <div class="data-card">
-                <div class="data-value" style="font-size: 1.1rem;">O*NET 30.0</div>
-                <div class="data-label">1,016 occupations<br>62,580 skill ratings</div>
-            </div>
-            <div class="data-card">
-                <div class="data-value" style="font-size: 1.1rem;">BLS OEWS</div>
-                <div class="data-label">Wage data<br>800+ occupations</div>
-            </div>
-            <div class="data-card">
-                <div class="data-value" style="font-size: 1.1rem;">BLS JOLTS</div>
-                <div class="data-label">Hiring trends<br>Monthly updates</div>
-            </div>
-            <div class="data-card">
-                <div class="data-value" style="font-size: 1.1rem;">Census PSEO</div>
-                <div class="data-label">Education outcomes<br>By institution</div>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
+    # Community
+    st.markdown('''
     <div class="community-card">
         <div class="community-title">Join the community</div>
         <div class="community-body">
             Career change is personal, but you don't have to do it alone. Our community connects students figuring out their first path, early-career professionals optimizing for growth, mid-career pivoters rediscovering purpose, and skilled immigrants navigating new markets. Share your wins, find accountability partners, get advice from people who've been where you are.
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
     
-    st.markdown("""
+    # Team
+    st.markdown('''
     <div class="card">
-        <div class="about-title">The team</div>
+        <div class="card-title">The team</div>
         <div class="about-body">
             CareerCraft is built by AMARI Group. We're a small team obsessed with bringing quantitative rigor to decisions that have historically been made on intuition. We believe everyone deserves access to the same quality of career intelligence that elite universities and top consulting firms provide to a select few.
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("Try CareerCheck", use_container_width=True):
-            st.session_state.page = "home"
-            st.session_state.step = "landing"
+        if st.button("Try CareerCheck", use_container_width=True, key="about_cta"):
+            navigate_to("home", "landing")
             st.rerun()
 
 # =============================================================================
-# USE CASES PAGE - 4 Research-backed Personas
+# USE CASES PAGE
 # =============================================================================
 
 def render_usecases():
-    st.markdown("""
+    st.markdown('''
     <div class="section-header">
         <div class="section-title">Who CareerCraft is for</div>
         <div class="section-subtitle">Real people with real career questions</div>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
     
-    st.markdown("""
+    st.markdown('''
     <div class="about-body" style="text-align: center; max-width: 560px; margin: 0 auto 2rem;">
         Career transitions are deeply personal. Our research identified four distinct segments - each with different needs, constraints, and definitions of success. Maybe you'll see yourself in one of them.
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
     
     for persona in PERSONAS:
         # Build constraints HTML
@@ -1704,7 +1618,7 @@ def render_usecases():
         # Build stats HTML
         stats_html = "".join([f'<span class="persona-stat">{s}</span>' for s in persona["stats"]])
         
-        st.markdown(f"""
+        st.markdown(f'''
         <div class="persona-card">
             <div class="persona-header">
                 <div>
@@ -1725,7 +1639,7 @@ def render_usecases():
             </div>
             
             <div class="persona-section-label">Key Constraints</div>
-            <div class="persona-constraints">{constraints_html}</div>
+            <div style="margin-bottom: 1rem;">{constraints_html}</div>
             
             <div class="persona-jtbd">
                 <div class="persona-jtbd-label">What they need</div>
@@ -1739,20 +1653,19 @@ def render_usecases():
             
             <div class="persona-stats">{stats_html}</div>
         </div>
-        """, unsafe_allow_html=True)
+        ''', unsafe_allow_html=True)
     
-    st.markdown("""
-    <div class="card" style="text-align: center; background: linear-gradient(135deg, #f5faf4 0%, #f0f7ff 100%); margin-top: 1.5rem;">
-        <div class="card-header">See yourself here?</div>
-        <div class="card-body">Take CareerCheck and get clarity on your own situation. Join a community of people navigating similar challenges.</div>
+    st.markdown('''
+    <div class="cta-card">
+        <div class="cta-title">See yourself here?</div>
+        <div class="cta-body">Take CareerCheck and get clarity on your own situation. Join a community of people navigating similar challenges.</div>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         if st.button("Start CareerCheck", use_container_width=True, key="usecase_cta"):
-            st.session_state.page = "home"
-            st.session_state.step = "landing"
+            navigate_to("home", "landing")
             st.rerun()
 
 # =============================================================================
@@ -1760,12 +1673,11 @@ def render_usecases():
 # =============================================================================
 
 def main():
+    render_nav()
+    
     if st.session_state.get("show_signup", False):
-        render_nav()
         render_signup()
         return
-    
-    render_nav()
     
     page = st.session_state.get("page", "home")
     
