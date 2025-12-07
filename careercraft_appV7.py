@@ -156,8 +156,8 @@ PERSONAS = [
             "Generic career quizzes haven't helped",
             "No way to see what skills she should develop"
         ],
-        "how_we_help": "CareerCraft matches Maya's strengths to real careers with actual salary data, shows her which skills to develop, and gives her a clear action plan.",
-        "outcome": "From confused to confident with a 4-week plan",
+        "how_we_help": "CareerCheck identifies Maya's strengths and matches her to careers with real salary data. Skills Lab shows exactly which skills to develop and their value. Pathways recommends courses and certifications ranked by earning potential. Sessions gives her a structured pack to discuss options with her uni career advisor.",
+        "outcome": "From confused to confident with a 12-month plan",
         "stats": ["75% of students change their major", "67% need help with career decisions", "Only 27% feel prepared for job market"]
     },
     {
@@ -174,8 +174,8 @@ PERSONAS = [
             "No clear data on what top performers did differently",
             "Making decisions based on guesswork and LinkedIn posts"
         ],
-        "how_we_help": "CareerCraft shows Darius exactly what each career path pays, which skills add the most value, and models his 5-year earning potential for each option.",
-        "outcome": "From guessing to data-driven career decisions",
+        "how_we_help": "Skills Lab shows Darius exactly which of his current skills are undervalued in his role but command premiums in adjacent fields. Careers lets him compare salary ceilings across paths. Pathways identifies the fastest credential to close his income gap. Sessions creates a mentor brief so he can get targeted advice from senior colleagues.",
+        "outcome": "From guessing to data-driven career moves",
         "stats": ["Property prices are 8x average income", "Right skills can add $20K+ to salary", "Strategic moves double income growth rate"]
     },
     {
@@ -192,7 +192,7 @@ PERSONAS = [
             "Can't find realistic transition paths",
             "Every option seems to require starting from scratch"
         ],
-        "how_we_help": "CareerCraft identifies which roles value Rachel's existing skills, shows realistic salary ranges for career changers, and maps out transition paths that preserve her income.",
+        "how_we_help": "Skills Lab maps Rachel's 15 years of experience into transferable skills and shows which industries pay more for them. Careers reveals roles she'd never considered where her skills are in demand. Pathways shows bridge credentials that legitimise her pivot without a full degree. Sessions prepares her for informational interviews with a clear story of her value.",
         "outcome": "From stuck to seeing a clear path forward",
         "stats": ["Average career changer is 39", "73% of skills transfer across industries", "Targeted pivots maintain 85% of income"]
     },
@@ -210,7 +210,7 @@ PERSONAS = [
             "Can't tell if pivoting to tech would pay off",
             "Limited network to get insider career advice"
         ],
-        "how_we_help": "CareerCraft shows Emmanuel which credentials actually increase earnings, compares growth potential across fields, and identifies roles where international experience is valued.",
+        "how_we_help": "Skills Lab quantifies Emmanuel's transferable skills and identifies roles where international experience is actually valued more. Careers shows him fields with the fastest salary catch-up for migrants. Pathways ranks Australian certifications by their actual impact on earnings. Sessions creates a networking brief he can share with professional mentors to get strategic introductions.",
         "outcome": "From undervalued to strategically positioned",
         "stats": ["Migrants earn 25% less on average", "Right certifications close the gap by 60%", "17% of business owners are migrants"]
     },
@@ -534,7 +534,7 @@ st.markdown("""
         top: 0;
         bottom: 0;
         width: 2px;
-        background: linear-gradient(180deg, #4A6741, #2563eb, #d97706);
+        background: linear-gradient(180deg, #4A6741, #2563eb, #d97706, #eab308);
         border-radius: 1px;
     }
     
@@ -559,6 +559,9 @@ st.markdown("""
     .tl-week1::before { background: #4A6741; }
     .tl-week2::before { background: #2563eb; }
     .tl-week3::before { background: #d97706; }
+    .tl-6months::before { background: #2563eb; }
+    .tl-8months::before { background: #d97706; }
+    .tl-12months::before { background: #eab308; }
     
     .tl-label {
         font-size: 0.55rem;
@@ -571,6 +574,9 @@ st.markdown("""
     .tl-week1 .tl-label { color: #86efac; }
     .tl-week2 .tl-label { color: #93c5fd; }
     .tl-week3 .tl-label { color: #fcd34d; }
+    .tl-6months .tl-label { color: #93c5fd; }
+    .tl-8months .tl-label { color: #fcd34d; }
+    .tl-12months .tl-label { color: #fef08a; }
     
     .tl-title {
         font-family: 'Fraunces', serif;
@@ -1091,7 +1097,7 @@ st.markdown("""
         text-transform: uppercase;
         letter-spacing: 0.08em;
         font-weight: 700;
-        color: #666;
+        color: #555;
         margin-bottom: 0.5rem;
     }
     
@@ -1108,18 +1114,22 @@ st.markdown("""
     
     .usecase-story {
         font-size: 0.95rem;
-        color: #444;
+        color: #333;
         line-height: 1.7;
         margin-bottom: 1.25rem;
     }
     
     .usecase-section {
+        background: white;
+        padding: 1rem;
+        border-radius: 10px;
+        border: 1px solid #f0ede8;
         margin-bottom: 1.25rem;
     }
     
     .usecase-pain-point {
         font-size: 0.9rem;
-        color: #444;
+        color: #333;
         padding: 0.5rem 0 0.5rem 1.25rem;
         position: relative;
         border-bottom: 1px solid #f5f5f5;
@@ -1138,7 +1148,7 @@ st.markdown("""
     }
     
     .usecase-solution {
-        background: linear-gradient(135deg, #e8f5e3 0%, #f0faf0 100%);
+        background: #f0faf0;
         border-left: 4px solid #4A6741;
         padding: 1rem 1.25rem;
         border-radius: 0 10px 10px 0;
@@ -1161,7 +1171,8 @@ st.markdown("""
     }
     
     .usecase-outcome {
-        background: #1a1a1a;
+        background: #f5faf4;
+        border: 2px solid #4A6741;
         padding: 1rem 1.25rem;
         border-radius: 10px;
         margin-bottom: 1rem;
@@ -1171,16 +1182,17 @@ st.markdown("""
         font-size: 0.65rem;
         text-transform: uppercase;
         letter-spacing: 0.1em;
-        font-weight: 600;
-        color: #86efac;
+        font-weight: 700;
+        color: #2d5a27;
         margin-bottom: 0.35rem;
     }
     
     .usecase-outcome-text {
         font-family: 'Fraunces', serif;
         font-size: 1.1rem;
-        color: #f5f5f5;
+        color: #1a1a1a;
         line-height: 1.4;
+        font-weight: 600;
     }
     
     .usecase-stats {
@@ -1196,7 +1208,7 @@ st.markdown("""
         border-radius: 6px;
         padding: 0.4rem 0.75rem;
         font-size: 0.8rem;
-        color: #444;
+        color: #333;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -1682,23 +1694,27 @@ def render_home_results():
     ''', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # Timeline
+    # Timeline - Extended with 6, 8, 12 month milestones
     top_career = top_match['career']['title']
     st.markdown(f'''
     <div class="timeline-card">
-        <div class="timeline-header">Your 4-Week Sprint</div>
+        <div class="timeline-header">Your 12-Month Roadmap</div>
         <div class="timeline">
             <div class="tl-item tl-week1">
-                <div class="tl-label">Week 1-2</div>
-                <div class="tl-title">Talk to 2 {top_career}s about their work</div>
+                <div class="tl-label">Next 4 weeks</div>
+                <div class="tl-title">Talk to 2 {top_career}s, start 1 small project, sample 1 short course or YouTube playlist.</div>
             </div>
-            <div class="tl-item tl-week2">
-                <div class="tl-label">Week 3</div>
-                <div class="tl-title">Start 1 small project to test your interest</div>
+            <div class="tl-item tl-6months">
+                <div class="tl-label">By 6 months</div>
+                <div class="tl-title">Commit to one pathway: a specific course, project, or role shift you are actively working towards.</div>
             </div>
-            <div class="tl-item tl-week3">
-                <div class="tl-label">Week 4</div>
-                <div class="tl-title">Reflect and decide on next steps</div>
+            <div class="tl-item tl-8months">
+                <div class="tl-label">By 8 months</div>
+                <div class="tl-title">Ship something real that others can see - a portfolio piece, case study, internal project, or certification.</div>
+            </div>
+            <div class="tl-item tl-12months">
+                <div class="tl-label">By 12 months</div>
+                <div class="tl-title">Review your skills, income, and satisfaction. Decide whether to double down on {top_career} or pivot with what you've learned.</div>
             </div>
         </div>
     </div>
