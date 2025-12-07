@@ -1401,7 +1401,7 @@ def render_home_landing():
     ''', unsafe_allow_html=True)
     
     st.markdown('<div class="scroll-fade">', unsafe_allow_html=True)
-    st.video("video 2.mp4")
+    st.video("VIDEO 1.mp4")
     st.markdown('<p class="video-caption">How we turn your answers into actionable insights</p>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
