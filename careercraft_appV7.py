@@ -1,6 +1,6 @@
 """
 CareerCraft – Career Intelligence Platform
-Multi-interface application with methodology transparency
+Landing page, About, and Use Cases with 4 research-backed personas
 """
 
 import streamlit as st
@@ -102,98 +102,179 @@ ANSWER_OPTIONS = [
 CAREERS = [
     {
         "id": "pm", "title": "Product Manager", "subtitle": "Shape what gets built", 
-        "range": "$95k-$180k", "median": 137000, "growth": 10,
-        "description": "Product Managers own the strategy and roadmap for products, working at the intersection of business, technology, and user experience.",
+        "range": "$95k-$180k", "median": 137000,
         "fit": {"technical": 60, "people_energy": 80, "people_style": 75, "analysis": 70, "structure": 60, "learning": 80, "client_facing": 70},
-        "top_skills": ["Strategic thinking", "Communication", "Data analysis", "User research", "Roadmap planning"],
-        "education": "Bachelor's degree typical, MBA common",
-        "source": "BLS OEWS 2024"
     },
     {
         "id": "dev", "title": "Software Developer", "subtitle": "Build and create",
-        "range": "$80k-$200k", "median": 132000, "growth": 17,
-        "description": "Software Developers design, build, and maintain applications and systems that power modern technology.",
+        "range": "$80k-$200k", "median": 132000,
         "fit": {"technical": 95, "people_energy": 40, "people_style": 45, "analysis": 80, "structure": 70, "learning": 90, "client_facing": 30},
-        "top_skills": ["Programming", "Problem solving", "System design", "Version control", "Testing"],
-        "education": "Bachelor's in CS or self-taught with portfolio",
-        "source": "BLS OEWS 2024"
     },
     {
         "id": "data", "title": "Data Analyst", "subtitle": "Find insights in numbers",
-        "range": "$65k-$130k", "median": 86000, "growth": 23,
-        "description": "Data Analysts collect, process, and analyze data to help organizations make informed decisions.",
+        "range": "$65k-$130k", "median": 86000,
         "fit": {"technical": 85, "people_energy": 45, "people_style": 40, "analysis": 95, "structure": 80, "learning": 70, "client_facing": 50},
-        "top_skills": ["SQL", "Statistical analysis", "Data visualization", "Excel", "Python/R"],
-        "education": "Bachelor's in quantitative field",
-        "source": "BLS OEWS 2024"
     },
     {
         "id": "ux", "title": "UX Designer", "subtitle": "Design for humans",
-        "range": "$70k-$150k", "median": 98000, "growth": 16,
-        "description": "UX Designers research user needs and design intuitive, accessible digital experiences.",
+        "range": "$70k-$150k", "median": 98000,
         "fit": {"technical": 50, "people_energy": 70, "people_style": 55, "analysis": 60, "structure": 50, "learning": 80, "client_facing": 75},
-        "top_skills": ["User research", "Wireframing", "Prototyping", "Visual design", "Usability testing"],
-        "education": "Bachelor's or bootcamp with strong portfolio",
-        "source": "BLS OEWS 2024"
     },
     {
         "id": "marketing", "title": "Marketing Manager", "subtitle": "Tell compelling stories",
-        "range": "$75k-$160k", "median": 140000, "growth": 7,
-        "description": "Marketing Managers develop and execute strategies to promote products and build brand awareness.",
+        "range": "$75k-$160k", "median": 140000,
         "fit": {"technical": 40, "people_energy": 85, "people_style": 70, "analysis": 50, "structure": 50, "learning": 70, "client_facing": 85},
-        "top_skills": ["Brand strategy", "Content creation", "Analytics", "Campaign management", "Communication"],
-        "education": "Bachelor's in Marketing or Business",
-        "source": "BLS OEWS 2024"
     },
     {
         "id": "consultant", "title": "Consultant", "subtitle": "Solve business problems",
-        "range": "$80k-$170k", "median": 99000, "growth": 11,
-        "description": "Consultants advise organizations on strategy, operations, and specific business challenges.",
+        "range": "$80k-$170k", "median": 99000,
         "fit": {"technical": 60, "people_energy": 80, "people_style": 75, "analysis": 75, "structure": 70, "learning": 90, "client_facing": 95},
-        "top_skills": ["Problem solving", "Presentation", "Analysis", "Client management", "Industry expertise"],
-        "education": "Bachelor's degree, MBA valued",
-        "source": "BLS OEWS 2024"
     },
     {
         "id": "analyst", "title": "Business Analyst", "subtitle": "Bridge tech and business",
-        "range": "$70k-$130k", "median": 95000, "growth": 14,
-        "description": "Business Analysts translate business needs into technical requirements and process improvements.",
+        "range": "$70k-$130k", "median": 95000,
         "fit": {"technical": 70, "people_energy": 65, "people_style": 50, "analysis": 85, "structure": 75, "learning": 75, "client_facing": 60},
-        "top_skills": ["Requirements gathering", "Process modeling", "Documentation", "SQL", "Stakeholder management"],
-        "education": "Bachelor's in Business or IT",
-        "source": "BLS OEWS 2024"
     },
     {
         "id": "manager", "title": "People Manager", "subtitle": "Lead and develop teams",
-        "range": "$90k-$170k", "median": 120000, "growth": 8,
-        "description": "People Managers lead teams, develop talent, and drive organizational performance.",
+        "range": "$90k-$170k", "median": 120000,
         "fit": {"technical": 45, "people_energy": 90, "people_style": 95, "analysis": 55, "structure": 70, "learning": 65, "client_facing": 60},
-        "top_skills": ["Leadership", "Coaching", "Performance management", "Conflict resolution", "Strategic planning"],
-        "education": "Bachelor's degree plus experience",
-        "source": "BLS OEWS 2024"
     },
 ]
 
-SKILLS_DATA = {
-    "Python": {"category": "Technical", "premium": 22000, "growth": "High", "demand": 94},
-    "SQL": {"category": "Technical", "premium": 15000, "growth": "Stable", "demand": 89},
-    "Data Analysis": {"category": "Technical", "premium": 18000, "growth": "High", "demand": 87},
-    "Machine Learning": {"category": "Technical", "premium": 35000, "growth": "Very High", "demand": 78},
-    "Cloud Computing": {"category": "Technical", "premium": 28000, "growth": "Very High", "demand": 82},
-    "Project Management": {"category": "Business", "premium": 16000, "growth": "Stable", "demand": 85},
-    "Communication": {"category": "Soft", "premium": 12000, "growth": "Stable", "demand": 95},
-    "Leadership": {"category": "Soft", "premium": 25000, "growth": "Stable", "demand": 80},
-    "Strategic Thinking": {"category": "Business", "premium": 20000, "growth": "Growing", "demand": 76},
-    "User Research": {"category": "Design", "premium": 14000, "growth": "Growing", "demand": 68},
-}
-
-MARKET_DATA = {
-    "Technology": {"hiring": "Strong", "yoy_change": 8, "openings": 1240000, "avg_salary": 125000},
-    "Healthcare": {"hiring": "Very Strong", "yoy_change": 12, "openings": 980000, "avg_salary": 78000},
-    "Finance": {"hiring": "Moderate", "yoy_change": 3, "openings": 520000, "avg_salary": 95000},
-    "Consulting": {"hiring": "Strong", "yoy_change": 6, "openings": 180000, "avg_salary": 105000},
-    "Marketing": {"hiring": "Moderate", "yoy_change": 4, "openings": 340000, "avg_salary": 72000},
-}
+# Research-backed personas from UX Research documents
+PERSONAS = [
+    {
+        "id": "maya",
+        "name": "Maya",
+        "archetype": "The Anxious Explorer",
+        "age": "19-22",
+        "stage": "Student / Recent Grad",
+        "location": "Urban university area",
+        "story": "Maya started university during peak pandemic uncertainty, choosing business as a 'safe' major before realizing it doesn't excite her. She's cycled through interests - psychology, UX design, marketing - without committing. Graduation approaches in 14 months and she feels paralyzed by options, terrified of 'wasting' her degree.",
+        "tension": "Stuck between too many options. Wants something meaningful but fears picking wrong and disappointing her family.",
+        "constraints": [
+            "$38K student debt creates pressure to find ROI on education",
+            "Parents' expectations limit perceived 'creative' options",
+            "Mental health challenges (anxiety) affect follow-through",
+            "Limited professional network beyond professors"
+        ],
+        "behaviors": [
+            "Crowdsources advice on Reddit at 2am",
+            "Watches 'day in the life' YouTube videos",
+            "Took online career quizzes but didn't trust results",
+            "Started LinkedIn profile (only 40% complete)",
+            "Bookmarked Coursera courses but didn't finish any"
+        ],
+        "jtbd": "When I'm lying awake worrying about graduation, I want to understand what realistic career paths match my skills and interests, so I can stop feeling paralyzed and start taking action.",
+        "blockers": "Analysis paralysis from too many options. Imposter syndrome when researching competitive fields. Tasks feel too big without breakdown.",
+        "trust_factors": "Shows data sources transparently. Doesn't feel like another personality quiz. Acknowledges uncertainty rather than false precision.",
+        "resonant_message": "Stop spiraling through Reddit threads at 2am. Get a plan you can actually follow.",
+        "stats": [
+            "42% of Gen Z have been diagnosed with a mental health condition",
+            "75% of students change their major at least once",
+            "67% of first-year students say they need help making career decisions"
+        ]
+    },
+    {
+        "id": "darius",
+        "name": "Darius",
+        "archetype": "The Ambitious Climber",
+        "age": "26-30",
+        "stage": "Early Career (3-5 years)",
+        "location": "Major metro area",
+        "story": "Darius excelled academically and landed a solid corporate job after graduation. He's been promoted once and is earning $85K, but watches peers at other companies pull $120K+. He and his partner want to buy property within 2-3 years, requiring significant salary growth or a strategic move.",
+        "tension": "Knows he needs to either push for promotion, jump to a competitor, or shift to a higher-ceiling field. Each path has trade-offs he can't fully evaluate.",
+        "constraints": [
+            "$42K remaining student debt",
+            "Partner's career limits geographic flexibility",
+            "Golden handcuffs from unvested RSUs",
+            "Doesn't want to restart at entry level in new field"
+        ],
+        "behaviors": [
+            "Spreadsheet models comparing compensation scenarios",
+            "LinkedIn stalking of successful peers",
+            "Uses Blind app for salary transparency",
+            "Started preparing for PM interviews but abandoned",
+            "Networked with 3-4 contacts at target companies"
+        ],
+        "jtbd": "When I see peers getting promoted or jumping to better roles, I want to understand exactly what moves will maximize my earnings over the next 5 years, so I can hit my financial goals and feel confident I'm not leaving money on the table.",
+        "blockers": "Difficulty comparing apples-to-oranges career paths. Lack of time for deep skill-building while working full-time. Interview prep is daunting when unsure which direction to prepare for.",
+        "trust_factors": "Real wage data with percentiles and regional adjustments. Sophisticated analysis that respects his intelligence. Shows what top performers in his cohort have done.",
+        "resonant_message": "Model your next 5 years. Compare paths. Optimize for what actually matters to you.",
+        "stats": [
+            "56% of early-career workers live paycheck-to-paycheck",
+            "Job tenure has dropped to 3.2 years for this cohort",
+            "86% say purpose is important to job satisfaction"
+        ]
+    },
+    {
+        "id": "rachel",
+        "name": "Rachel",
+        "archetype": "The Burned-Out Reinventor",
+        "age": "36-44",
+        "stage": "Mid-Career (12-18 years)",
+        "location": "Suburban area near major city",
+        "story": "Rachel built a respectable career in corporate marketing, reaching Director level by her late 30s. COVID's remote work revelation showed her that work-life balance was possible - then return-to-office mandates and layoffs brought burnout to a breaking point. She recently turned down a promotion because it meant more travel and stress.",
+        "tension": "Wants out of the corporate grind but can't afford to start over at entry level. Explored coaching, therapy, even counseling school - but each path requires sacrificing either income or years of career capital.",
+        "constraints": [
+            "Mortgage and family obligations create $90K minimum income floor",
+            "Healthcare dependent on employment",
+            "Age discrimination concerns",
+            "Two school-age children limit time for retraining",
+            "Caring duties for aging parent emerging"
+        ],
+        "behaviors": [
+            "Took MBTI and StrengthsFinder (results didn't translate to action)",
+            "Completed one coaching session (expensive, unclear ROI)",
+            "Lurks in career transition communities",
+            "Updated LinkedIn but didn't activate 'open to work'",
+            "Browses job boards without applying"
+        ],
+        "jtbd": "When I wake up dreading Monday again, I want to find a realistic path to work that's sustainable and meaningful, so I can stop feeling trapped and show my kids that it's possible to love what you do.",
+        "blockers": "Every option seems to require giving up too much. Fear of making situation worse. Exhaustion from current job leaves no energy for job search.",
+        "trust_factors": "Acknowledges constraints rather than dismissing them. Shows salary data for pivot roles. Stories of people her age who succeeded. Doesn't feel like it's designed for 25-year-olds.",
+        "resonant_message": "You've built skills. Let's figure out where they're valued - without starting over.",
+        "stats": [
+            "Average career changer is 39 years old",
+            "43% say 'it's too late to change' holds them back",
+            "35% cite burnout as top career concern"
+        ]
+    },
+    {
+        "id": "emmanuel",
+        "name": "Emmanuel",
+        "archetype": "The First-Gen Navigator",
+        "age": "28-34",
+        "stage": "Skilled Professional (5-10 years)",
+        "location": "Gateway city",
+        "story": "Emmanuel immigrated six years ago with an accounting degree and three years of professional experience. Credential recognition took longer than expected. He worked as a rideshare driver, then warehouse supervisor, while studying for CPA equivalency. He's now a junior accountant earning 40% less than domestic peers and is passed over for promotions.",
+        "tension": "Feels trapped between stability of current path (continue toward CPA, hope for promotion) and opportunity cost of not pivoting to tech or higher-growth fields while still young enough to learn.",
+        "constraints": [
+            "Immigration status limits job flexibility",
+            "Sends $500/month to parents back home",
+            "Credential recognition barriers devalue qualifications",
+            "Limited domestic professional network",
+            "Cultural navigation in corporate environments"
+        ],
+        "behaviors": [
+            "Completed CPA equivalency requirements",
+            "LinkedIn profile carefully maintained",
+            "Applied to 50+ jobs in past year (most no response)",
+            "Attended professional association events",
+            "Started online course (didn't finish due to time constraints)"
+        ],
+        "jtbd": "When I see domestic peers advancing faster despite less experience, I want to understand what credentials, skills, and strategies will accelerate my career given my specific constraints, so I can build the secure future I immigrated for.",
+        "blockers": "Time poverty (works full-time, studies, family obligations). Unclear which investments will actually pay off. Difficulty getting informational interviews from cold outreach.",
+        "trust_factors": "Acknowledges specific constraints (visa, credential recognition). Shows pathways others with his background have taken. Provides concrete ROI on certifications.",
+        "resonant_message": "Your skills traveled with you. Let's make sure employers see them.",
+        "stats": [
+            "First-gen households earn median $99,600 vs $135,800 for continuing-gen peers",
+            "17% of OECD self-employed are migrants",
+            "Nearly 1/3 of US workers lack foundational digital skills"
+        ]
+    },
+]
 
 # =============================================================================
 # CSS
@@ -212,7 +293,7 @@ st.markdown("""
     
     .main .block-container {
         padding: 1.5rem 1rem 4rem;
-        max-width: 720px;
+        max-width: 700px;
     }
     
     h1, h2, h3, h4 {
@@ -231,7 +312,7 @@ st.markdown("""
         justify-content: space-between;
         align-items: center;
         padding: 0.75rem 0;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
         border-bottom: 1px solid #e8e5e0;
     }
     
@@ -260,38 +341,6 @@ st.markdown("""
         font-size: 1.2rem;
         font-weight: 600;
         color: #1a1a1a;
-    }
-    
-    /* Tabs */
-    .nav-tabs {
-        display: flex;
-        gap: 0.25rem;
-        background: #f0ede8;
-        padding: 0.25rem;
-        border-radius: 8px;
-    }
-    
-    .nav-tab {
-        padding: 0.5rem 0.9rem;
-        font-size: 0.8rem;
-        font-weight: 500;
-        color: #666;
-        background: transparent;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    
-    .nav-tab:hover {
-        color: #1a1a1a;
-        background: rgba(255,255,255,0.5);
-    }
-    
-    .nav-tab.active {
-        background: white;
-        color: #1a1a1a;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }
     
     /* Progress bar */
@@ -412,19 +461,13 @@ st.markdown("""
         margin-bottom: 0.5rem;
     }
     
-    .card-meta {
-        font-size: 0.85rem;
-        color: #666;
-        margin-bottom: 0.75rem;
-    }
-    
     .card-body {
         font-size: 0.9rem;
         color: #444;
-        line-height: 1.55;
+        line-height: 1.6;
     }
     
-    /* Data cards */
+    /* Data grid */
     .data-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -455,7 +498,7 @@ st.markdown("""
         letter-spacing: 0.05em;
     }
     
-    /* Result cards */
+    /* Pills */
     .result-label {
         font-size: 0.65rem;
         text-transform: uppercase;
@@ -646,68 +689,226 @@ st.markdown("""
         font-weight: 500;
     }
     
-    /* Signup section */
-    .signup-section {
+    /* Persona cards - Enhanced */
+    .persona-card {
         background: white;
         border-radius: 16px;
-        padding: 2rem;
-        margin: 1.5rem 0;
-        border: 1px solid #e8e5e0;
-    }
-    
-    .signup-header {
-        text-align: center;
+        padding: 1.75rem;
         margin-bottom: 1.5rem;
+        border: 1px solid #e8e5e0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
     
-    .signup-title {
+    .persona-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #f0ede8;
+    }
+    
+    .persona-name {
         font-family: 'Fraunces', serif;
         font-size: 1.4rem;
-        font-weight: 700;
+        font-weight: 600;
         color: #1a1a1a;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.15rem;
     }
     
-    .signup-subtitle {
+    .persona-archetype {
         font-size: 0.95rem;
+        color: #4A6741;
+        font-weight: 500;
+    }
+    
+    .persona-meta {
+        text-align: right;
+    }
+    
+    .persona-age {
+        font-size: 0.85rem;
+        color: #666;
+        margin-bottom: 0.2rem;
+    }
+    
+    .persona-stage {
+        font-size: 0.75rem;
+        color: #888;
+        background: #f5f5f5;
+        padding: 0.25rem 0.6rem;
+        border-radius: 999px;
+        display: inline-block;
+    }
+    
+    .persona-story {
+        font-size: 0.95rem;
+        color: #444;
+        line-height: 1.65;
+        margin-bottom: 1.25rem;
+    }
+    
+    .persona-tension {
+        background: linear-gradient(135deg, #fef3e2 0%, #fff 100%);
+        border-left: 3px solid #d97706;
+        padding: 0.9rem 1rem;
+        border-radius: 0 8px 8px 0;
+        margin-bottom: 1.25rem;
+    }
+    
+    .persona-tension-label {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: #b45309;
+        font-weight: 600;
+        margin-bottom: 0.35rem;
+    }
+    
+    .persona-tension-text {
+        font-size: 0.9rem;
+        color: #444;
+        line-height: 1.5;
+        font-style: italic;
+    }
+    
+    .persona-section-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: #888;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        margin-top: 1rem;
+    }
+    
+    .persona-constraints {
+        margin-bottom: 1rem;
+    }
+    
+    .persona-constraint {
+        font-size: 0.85rem;
+        color: #555;
+        margin-bottom: 0.4rem;
+        padding-left: 1rem;
+        position: relative;
+        line-height: 1.45;
+    }
+    
+    .persona-constraint::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0.45rem;
+        width: 5px;
+        height: 5px;
+        background: #d97706;
+        border-radius: 50%;
+    }
+    
+    .persona-jtbd {
+        background: linear-gradient(135deg, #f5faf4 0%, #fff 100%);
+        border-left: 3px solid #4A6741;
+        padding: 1rem;
+        border-radius: 0 8px 8px 0;
+        margin: 1rem 0;
+    }
+    
+    .persona-jtbd-label {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: #2d5a27;
+        font-weight: 600;
+        margin-bottom: 0.35rem;
+    }
+    
+    .persona-jtbd-text {
+        font-size: 0.95rem;
+        color: #2d2d2d;
+        line-height: 1.55;
+    }
+    
+    .persona-message {
+        background: #1a1a1a;
+        color: #f5f5f5;
+        padding: 1rem 1.25rem;
+        border-radius: 10px;
+        margin-top: 1.25rem;
+    }
+    
+    .persona-message-label {
+        font-size: 0.6rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #86efac;
+        font-weight: 600;
+        margin-bottom: 0.35rem;
+    }
+    
+    .persona-message-text {
+        font-family: 'Fraunces', serif;
+        font-size: 1.05rem;
+        line-height: 1.45;
+    }
+    
+    .persona-stats {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
+    
+    .persona-stat {
+        background: #f8f8f6;
+        border: 1px solid #e8e5e0;
+        border-radius: 6px;
+        padding: 0.4rem 0.7rem;
+        font-size: 0.75rem;
         color: #555;
     }
     
-    .pitch-section {
-        background: #f8f8f6;
-        border-radius: 12px;
-        padding: 1.25rem;
-        margin: 1.25rem 0;
+    /* About section */
+    .about-section {
+        margin: 1.5rem 0;
     }
     
-    .pitch-title {
+    .about-title {
         font-family: 'Fraunces', serif;
-        font-size: 1rem;
+        font-size: 1.3rem;
         font-weight: 600;
         color: #1a1a1a;
         margin-bottom: 0.75rem;
     }
     
+    .about-body {
+        font-size: 0.95rem;
+        color: #444;
+        line-height: 1.7;
+        margin-bottom: 1rem;
+    }
+    
     .pitch-item {
         display: flex;
         gap: 0.75rem;
-        margin-bottom: 0.75rem;
+        margin-bottom: 1rem;
         font-size: 0.9rem;
         color: #2d2d2d;
-        line-height: 1.45;
+        line-height: 1.5;
     }
     
-    .pitch-icon {
-        width: 20px;
-        height: 20px;
+    .pitch-num {
+        width: 24px;
+        height: 24px;
         background: #4A6741;
+        color: white;
         border-radius: 50%;
         flex-shrink: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: white;
-        font-size: 0.65rem;
+        font-size: 0.75rem;
+        font-weight: 600;
         margin-top: 0.1rem;
     }
     
@@ -727,193 +928,46 @@ st.markdown("""
         color: #555;
     }
     
-    /* Career card */
-    .career-card {
-        background: white;
-        border-radius: 12px;
-        padding: 1.25rem;
-        margin-bottom: 1rem;
-        border: 1px solid #e8e5e0;
-        transition: all 0.2s;
+    /* Section header */
+    .section-header {
+        margin-bottom: 1.5rem;
+        text-align: center;
     }
     
-    .career-card:hover {
-        border-color: #4A6741;
-        box-shadow: 0 4px 12px rgba(74, 103, 65, 0.1);
-    }
-    
-    .career-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 0.75rem;
-    }
-    
-    .career-title {
+    .section-title {
         font-family: 'Fraunces', serif;
-        font-size: 1.15rem;
-        font-weight: 600;
+        font-size: 1.6rem;
+        font-weight: 700;
         color: #1a1a1a;
-        margin-bottom: 0.15rem;
+        margin-bottom: 0.35rem;
     }
     
-    .career-subtitle {
-        font-size: 0.85rem;
+    .section-subtitle {
+        font-size: 0.95rem;
         color: #666;
     }
     
-    .career-salary {
-        text-align: right;
+    /* Community card */
+    .community-card {
+        background: linear-gradient(135deg, #f0f7ff 0%, #f5faf4 100%);
+        border: 1px solid #d1e3f0;
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin: 1rem 0;
     }
     
-    .career-salary-value {
+    .community-title {
         font-family: 'Fraunces', serif;
         font-size: 1.1rem;
         font-weight: 600;
-        color: #4A6741;
-    }
-    
-    .career-salary-label {
-        font-size: 0.7rem;
-        color: #888;
-    }
-    
-    .career-stats {
-        display: flex;
-        gap: 1.5rem;
-        margin: 0.75rem 0;
-        padding: 0.75rem 0;
-        border-top: 1px solid #f0ede8;
-        border-bottom: 1px solid #f0ede8;
-    }
-    
-    .career-stat {
-        text-align: center;
-    }
-    
-    .career-stat-value {
-        font-weight: 600;
         color: #1a1a1a;
-        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
     }
     
-    .career-stat-label {
-        font-size: 0.7rem;
-        color: #888;
-        text-transform: uppercase;
-        letter-spacing: 0.03em;
-    }
-    
-    .career-skills {
-        margin-top: 0.75rem;
-    }
-    
-    .career-skills-label {
-        font-size: 0.7rem;
-        color: #888;
-        text-transform: uppercase;
-        letter-spacing: 0.03em;
-        margin-bottom: 0.4rem;
-    }
-    
-    /* Skill row */
-    .skill-row {
-        background: white;
-        border-radius: 10px;
-        padding: 1rem 1.25rem;
-        margin-bottom: 0.6rem;
-        border: 1px solid #e8e5e0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .skill-info {
-        flex: 1;
-    }
-    
-    .skill-name {
-        font-weight: 600;
-        color: #1a1a1a;
-        font-size: 0.95rem;
-        margin-bottom: 0.15rem;
-    }
-    
-    .skill-category {
-        font-size: 0.75rem;
-        color: #888;
-    }
-    
-    .skill-premium {
-        text-align: right;
-    }
-    
-    .skill-premium-value {
-        font-family: 'Fraunces', serif;
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #4A6741;
-    }
-    
-    .skill-premium-label {
-        font-size: 0.65rem;
-        color: #888;
-    }
-    
-    .skill-demand {
-        width: 60px;
-        text-align: center;
-        margin-left: 1rem;
-    }
-    
-    .skill-demand-bar {
-        height: 4px;
-        background: #e8e5e0;
-        border-radius: 2px;
-        overflow: hidden;
-        margin-bottom: 0.25rem;
-    }
-    
-    .skill-demand-fill {
-        height: 100%;
-        background: #4A6741;
-        border-radius: 2px;
-    }
-    
-    .skill-demand-label {
-        font-size: 0.65rem;
-        color: #888;
-    }
-    
-    /* Methodology section */
-    .method-section {
-        margin: 1.5rem 0;
-    }
-    
-    .method-title {
-        font-family: 'Fraunces', serif;
-        font-size: 1.15rem;
-        font-weight: 600;
-        color: #1a1a1a;
-        margin-bottom: 0.75rem;
-    }
-    
-    .method-body {
+    .community-body {
         font-size: 0.9rem;
         color: #444;
-        line-height: 1.65;
-        margin-bottom: 1rem;
-    }
-    
-    .formula-box {
-        background: #1a1a1a;
-        border-radius: 8px;
-        padding: 1rem 1.25rem;
-        font-family: 'SF Mono', 'Monaco', monospace;
-        font-size: 0.85rem;
-        color: #86efac;
-        overflow-x: auto;
-        margin: 0.75rem 0;
+        line-height: 1.6;
     }
     
     /* Streamlit overrides */
@@ -961,36 +1015,12 @@ st.markdown("""
         box-shadow: 0 0 0 1px #4A6741 !important;
     }
     
-    .stSelectbox > div > div {
-        background: white !important;
-        border: 1.5px solid #d1d1d1 !important;
-        border-radius: 8px !important;
-    }
-    
     .footer-note {
         text-align: center;
         font-size: 0.75rem;
         color: #888;
         margin-top: 1.25rem;
         font-style: italic;
-    }
-    
-    /* Section header */
-    .section-header {
-        margin-bottom: 1.25rem;
-    }
-    
-    .section-title {
-        font-family: 'Fraunces', serif;
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #1a1a1a;
-        margin-bottom: 0.35rem;
-    }
-    
-    .section-subtitle {
-        font-size: 0.95rem;
-        color: #666;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -1039,6 +1069,10 @@ def get_strengths_and_gaps(answers):
         gaps = [dimension_names.get(sorted_answers[-1][0], "Growth area")]
     return strengths, gaps
 
+# =============================================================================
+# AI COACHES
+# =============================================================================
+
 COACH_SYSTEM = """You are a thoughtful career coach. Help people think through career decisions with:
 1. What matters most right now
 2. How to frame the next 3-6 months
@@ -1046,23 +1080,22 @@ COACH_SYSTEM = """You are a thoughtful career coach. Help people think through c
 Keep responses under 200 words. Be warm but direct."""
 
 def get_fallback_response(user_msg, context):
-    """Always-available fallback when APIs aren't configured"""
-    return f"""Based on your profile, here's how I'd approach this:
+    return """Based on your profile, here's how I'd approach this:
 
-**Start with conversations, not courses.** Before investing in any training, talk to 2-3 people actually doing the work you're considering. Ask them: What surprised you about this role? What do you wish you'd known?
+Start with conversations, not courses. Before investing in any training, talk to 2-3 people actually doing the work you're considering. Ask them: What surprised you about this role? What do you wish you'd known?
 
-**Run a small experiment.** Pick one thing you can try in the next 2 weeks that tests your interest. Could be a side project, volunteering for a task at work, or taking a free introductory course.
+Run a small experiment. Pick one thing you can try in the next 2 weeks that tests your interest. Could be a side project, volunteering for a task at work, or taking a free introductory course.
 
-**Your strengths are your foundation.** Build from what already works for you rather than trying to fix every gap at once. Look for roles that let you use your existing strengths while gradually building new skills.
+Your strengths are your foundation. Build from what already works for you rather than trying to fix every gap at once. Look for roles that let you use your existing strengths while gradually building new skills.
 
-The goal isn't to have perfect clarity—it's to learn enough to take the next small step with confidence.
+The goal isn't to have perfect clarity - it's to learn enough to take the next small step with confidence.
 
 What specific aspect would you like to explore further?"""
 
 def get_claude_response(user_msg, context):
     api_key = get_secret("ANTHROPIC_API_KEY")
     if not api_key:
-        return None, "ANTHROPIC_API_KEY not found in secrets"
+        return None, "ANTHROPIC_API_KEY not configured"
     if not ANTHROPIC_AVAILABLE:
         return None, "anthropic package not installed"
     try:
@@ -1075,12 +1108,12 @@ def get_claude_response(user_msg, context):
         )
         return resp.content[0].text.strip(), None
     except Exception as e:
-        return None, f"Claude API error: {str(e)}"
+        return None, f"Claude error: {str(e)}"
 
 def get_chatgpt_response(user_msg, context):
     api_key = get_secret("OPENAI_API_KEY")
     if not api_key:
-        return None, "OPENAI_API_KEY not found in secrets"
+        return None, "OPENAI_API_KEY not configured"
     if not OPENAI_AVAILABLE:
         return None, "openai package not installed"
     try:
@@ -1095,12 +1128,12 @@ def get_chatgpt_response(user_msg, context):
         )
         return resp.choices[0].message.content.strip(), None
     except Exception as e:
-        return None, f"ChatGPT API error: {str(e)}"
+        return None, f"ChatGPT error: {str(e)}"
 
 def get_gemini_response(user_msg, context):
     api_key = get_secret("GOOGLE_API_KEY")
     if not api_key:
-        return None, "GOOGLE_API_KEY not found in secrets"
+        return None, "GOOGLE_API_KEY not configured"
     if not GEMINI_AVAILABLE:
         return None, "google-generativeai package not installed"
     try:
@@ -1110,10 +1143,9 @@ def get_gemini_response(user_msg, context):
         resp = model.generate_content(prompt)
         return resp.text.strip(), None
     except Exception as e:
-        return None, f"Gemini API error: {str(e)}"
+        return None, f"Gemini error: {str(e)}"
 
 def check_api_status():
-    """Check which APIs are configured"""
     status = {}
     status["claude"] = bool(get_secret("ANTHROPIC_API_KEY")) and ANTHROPIC_AVAILABLE
     status["chatgpt"] = bool(get_secret("OPENAI_API_KEY")) and OPENAI_AVAILABLE
@@ -1125,7 +1157,7 @@ def check_api_status():
 # =============================================================================
 
 if "page" not in st.session_state:
-    st.session_state.page = "careercheck"
+    st.session_state.page = "home"
     st.session_state.step = "landing"
     st.session_state.question_idx = 0
     st.session_state.answers = {}
@@ -1139,17 +1171,7 @@ if "page" not in st.session_state:
 # =============================================================================
 
 def render_nav():
-    pages = [
-        ("CareerCheck", "careercheck"),
-        ("Careers", "careers"),
-        ("Skills Lab", "skills"),
-        ("Market", "market"),
-        ("Methodology", "methodology"),
-    ]
-    
-    st.markdown('<div class="nav-container">', unsafe_allow_html=True)
-    
-    col1, col2 = st.columns([1, 3])
+    col1, col2 = st.columns([1, 2])
     
     with col1:
         st.markdown("""
@@ -1160,67 +1182,76 @@ def render_nav():
         """, unsafe_allow_html=True)
     
     with col2:
-        cols = st.columns(len(pages) + 1)
-        for i, (label, page_id) in enumerate(pages):
-            with cols[i]:
-                is_active = st.session_state.page == page_id
-                if st.button(label, key=f"nav_{page_id}", type="secondary" if not is_active else "primary"):
-                    st.session_state.page = page_id
-                    st.rerun()
-        
-        with cols[-1]:
+        cols = st.columns([1, 1, 1, 1])
+        with cols[0]:
+            if st.button("Home", key="nav_home", type="secondary" if st.session_state.page != "home" else "primary"):
+                st.session_state.page = "home"
+                st.session_state.step = "landing"
+                st.rerun()
+        with cols[1]:
+            if st.button("About", key="nav_about", type="secondary" if st.session_state.page != "about" else "primary"):
+                st.session_state.page = "about"
+                st.rerun()
+        with cols[2]:
+            if st.button("Use Cases", key="nav_usecases", type="secondary" if st.session_state.page != "usecases" else "primary"):
+                st.session_state.page = "usecases"
+                st.rerun()
+        with cols[3]:
             if st.button("Sign up", key="nav_signup", type="secondary"):
                 st.session_state.show_signup = True
                 st.rerun()
     
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("<hr style='margin: 0.5rem 0 1.5rem; border: none; border-top: 1px solid #e8e5e0;'>", unsafe_allow_html=True)
 
 # =============================================================================
-# SIGNUP PAGE
+# SIGNUP PAGE - Updated pitch
 # =============================================================================
 
 def render_signup():
     st.markdown("""
-    <div class="signup-section">
-        <div class="signup-header">
-            <div class="signup-title">Join CareerCraft</div>
-            <div class="signup-subtitle">Career intelligence powered by real data and proven methodology</div>
-        </div>
+    <div class="section-header">
+        <div class="section-title">Join CareerCraft</div>
+        <div class="section-subtitle">Career intelligence powered by real data</div>
     </div>
     """, unsafe_allow_html=True)
     
-    # The pitch
+    # The pitch - Updated language
     st.markdown("""
-    <div class="pitch-section">
-        <div class="pitch-title">What makes CareerCraft different</div>
+    <div class="card" style="background: #f8f8f6;">
+        <div class="about-title">What you're joining</div>
         
         <div class="pitch-item">
-            <div class="pitch-icon">1</div>
-            <div><strong>Government-grade data, not opinions.</strong> We integrate O*NET (1,016 occupations, 62,580 skill ratings), BLS wage data, JOLTS hiring records, and Census educational outcomes. Every recommendation is grounded in verified labor market data.</div>
+            <div class="pitch-num">1</div>
+            <div><strong>Enterprise-grade data, not opinions.</strong> We integrate O*NET (1,016 occupations, 62,580 skill ratings), BLS wage data, JOLTS hiring records, and Census educational outcomes. Every recommendation is grounded in verified labor market data used by Fortune 500 companies and research institutions.</div>
         </div>
         
         <div class="pitch-item">
-            <div class="pitch-icon">2</div>
-            <div><strong>Skill-level ROI calculations.</strong> Most tools tell you a degree is "worth it." We calculate the specific wage premium for individual skills. Python adds ~$22,000/year. Project management adds ~$16,000. You see exactly what to learn.</div>
+            <div class="pitch-num">2</div>
+            <div><strong>Skill-level ROI calculations.</strong> Most tools tell you a degree is "worth it." We calculate the specific wage premium for individual skills. Python adds ~$22,000/year. Project management adds ~$16,000. You see exactly what to learn and what it's worth.</div>
         </div>
         
         <div class="pitch-item">
-            <div class="pitch-icon">3</div>
-            <div><strong>PhD-level methodology.</strong> Our matching uses hedonic wage regression (Dey & Loewenstein), causal inference for treatment effects (Athey & Wager), and conformal prediction for uncertainty quantification. This isn't a quiz—it's econometric analysis.</div>
+            <div class="pitch-num">3</div>
+            <div><strong>Research-backed precision.</strong> Our matching uses hedonic wage regression, causal inference for treatment effects, and conformal prediction for uncertainty. This isn't a quiz - it's the same econometric rigor used in academic labor economics research.</div>
         </div>
         
         <div class="pitch-item">
-            <div class="pitch-icon">4</div>
-            <div><strong>Transparent algorithms.</strong> Every recommendation comes with SHAP explanations showing why. No black boxes. You can see the math, audit the logic, and understand exactly how we arrived at your results.</div>
+            <div class="pitch-num">4</div>
+            <div><strong>Transparent algorithms.</strong> Every recommendation comes with explanations showing why. No black boxes. You can see the math, audit the logic, and understand exactly how we arrived at your results.</div>
         </div>
         
         <div class="pitch-item">
-            <div class="pitch-icon">5</div>
-            <div><strong>Longitudinal tracking.</strong> Your profile persists. As you build skills and the market shifts, your recommendations update. Version control lets you see how your trajectory evolves over time.</div>
+            <div class="pitch-num">5</div>
+            <div><strong>A community of career crafters.</strong> You're not navigating alone. Join thousands of professionals at every stage - from anxious explorers to ambitious climbers to seasoned reinventors - sharing insights, accountability, and real stories of transition.</div>
         </div>
         
-        <div style="margin-top: 1rem;">
-            <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem; font-weight: 600;">DATA SOURCES</div>
+        <div class="pitch-item">
+            <div class="pitch-num">6</div>
+            <div><strong>Longitudinal tracking.</strong> Your profile persists. As you build skills and the market shifts, your recommendations update. Track your progress over time with version control for your career trajectory.</div>
+        </div>
+        
+        <div style="margin-top: 1.25rem;">
+            <div style="font-size: 0.75rem; color: #666; margin-bottom: 0.5rem; font-weight: 600;">DATA SOURCES</div>
             <div class="data-sources">
                 <span class="data-source">O*NET 30.0</span>
                 <span class="data-source">BLS OEWS</span>
@@ -1232,7 +1263,18 @@ def render_signup():
     </div>
     """, unsafe_allow_html=True)
     
+    # Community highlight
+    st.markdown("""
+    <div class="community-card">
+        <div class="community-title">Join the community</div>
+        <div class="community-body">
+            Connect with others on similar journeys. Our community includes students exploring their first career, early-career professionals optimizing for growth, mid-career pivoters seeking meaning, and skilled immigrants navigating new markets. Share wins, get accountability, find mentors.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
     # Form
+    st.markdown("<div class='card'>", unsafe_allow_html=True)
     with st.form("signup_form"):
         col1, col2 = st.columns(2)
         with col1:
@@ -1257,13 +1299,14 @@ def render_signup():
             st.success("Account created! Welcome to CareerCraft.")
             st.session_state.show_signup = False
     
+    st.markdown("</div>", unsafe_allow_html=True)
     st.markdown('<p class="footer-note">Free during beta. No credit card required.</p>', unsafe_allow_html=True)
 
 # =============================================================================
-# CAREERCHECK PAGE
+# HOME PAGE (CareerCheck)
 # =============================================================================
 
-def render_careercheck_landing():
+def render_home_landing():
     st.markdown("""
     <div class="hero">
         <div class="hero-badge">
@@ -1305,7 +1348,7 @@ def render_careercheck_landing():
     
     st.markdown('<p class="footer-note">No signup required to start.</p>', unsafe_allow_html=True)
 
-def render_careercheck_questions():
+def render_home_questions():
     idx = st.session_state.question_idx
     total = len(QUESTIONS)
     question = QUESTIONS[idx]
@@ -1372,7 +1415,7 @@ def render_careercheck_questions():
                 st.session_state.question_idx += 1
                 st.rerun()
 
-def render_careercheck_results():
+def render_home_results():
     answers = st.session_state.answers
     matches = calculate_career_matches(answers)
     strengths, gaps = get_strengths_and_gaps(answers)
@@ -1382,7 +1425,7 @@ def render_careercheck_results():
     third_match = matches[2]
     
     st.markdown("""
-    <div class="section-header" style="text-align: center;">
+    <div class="section-header">
         <div class="section-title">Your Results</div>
         <div class="section-subtitle">Based on your 7 answers</div>
     </div>
@@ -1455,10 +1498,7 @@ def render_careercheck_results():
     st.markdown('<div class="coach-title">Talk to a Career Coach</div>', unsafe_allow_html=True)
     st.markdown('<div class="coach-subtitle">Get personalized advice powered by AI</div>', unsafe_allow_html=True)
     
-    # Check API status
     api_status = check_api_status()
-    
-    # Show which coaches are available
     available_coaches = []
     if api_status["claude"]:
         available_coaches.append("Claude")
@@ -1466,7 +1506,7 @@ def render_careercheck_results():
         available_coaches.append("ChatGPT")
     if api_status["gemini"]:
         available_coaches.append("Gemini")
-    available_coaches.append("CareerCraft Coach")  # Always available fallback
+    available_coaches.append("CareerCraft Coach")
     
     coach_choice = st.radio("Select coach:", available_coaches, horizontal=True, label_visibility="collapsed")
     
@@ -1486,16 +1526,13 @@ def render_careercheck_results():
                 elif coach_choice == "Gemini":
                     response, error = get_gemini_response(user_input, context)
                 else:
-                    # CareerCraft Coach fallback
                     response = get_fallback_response(user_input, context)
-                    error = None
                 
                 if response:
                     st.session_state.coach_response = response
                     st.session_state.coach_provider = coach_choice
                     st.session_state.coach_error = None
                 elif error:
-                    # Try fallback on error
                     st.session_state.coach_response = get_fallback_response(user_input, context)
                     st.session_state.coach_provider = "CareerCraft Coach"
                     st.session_state.coach_error = error
@@ -1503,20 +1540,17 @@ def render_careercheck_results():
     
     if st.session_state.get("coach_response"):
         st.markdown(f'<div class="coach-response">{st.session_state.coach_response}</div>', unsafe_allow_html=True)
-        provider = st.session_state.get("coach_provider", "")
-        if provider:
-            st.markdown(f'<div class="coach-provider">Response from {provider}</div>', unsafe_allow_html=True)
-        
-        # Show error if there was one (for debugging)
+        if st.session_state.get("coach_provider"):
+            st.markdown(f'<div class="coach-provider">Response from {st.session_state.coach_provider}</div>', unsafe_allow_html=True)
         if st.session_state.get("coach_error"):
-            st.caption(f"Note: {st.session_state.coach_error} - Using fallback coach instead.")
+            st.caption(f"Note: {st.session_state.coach_error}")
     
     st.markdown('</div>', unsafe_allow_html=True)
     
     # Save results CTA
     st.markdown('<div class="card" style="text-align: center; background: linear-gradient(135deg, #f5faf4 0%, #f0f7ff 100%);">', unsafe_allow_html=True)
-    st.markdown('<div class="card-header">Save your results</div>', unsafe_allow_html=True)
-    st.markdown('<div class="card-body">Create an account to track progress and get updated recommendations.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="card-header">Save your results and join the community</div>', unsafe_allow_html=True)
+    st.markdown('<div class="card-body">Create an account to track progress, get updated recommendations, and connect with others on similar journeys.</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1, 2, 1])
@@ -1531,208 +1565,74 @@ def render_careercheck_results():
         st.session_state.coach_response = None
         st.rerun()
 
-def render_careercheck():
+def render_home():
     if st.session_state.step == "landing":
-        render_careercheck_landing()
+        render_home_landing()
     elif st.session_state.step == "questions":
-        render_careercheck_questions()
+        render_home_questions()
     elif st.session_state.step == "results":
-        render_careercheck_results()
+        render_home_results()
 
 # =============================================================================
-# CAREERS PAGE
+# ABOUT PAGE - Updated language
 # =============================================================================
 
-def render_careers():
+def render_about():
     st.markdown("""
     <div class="section-header">
-        <div class="section-title">Career Explorer</div>
-        <div class="section-subtitle">Browse careers with real salary and growth data from BLS</div>
+        <div class="section-title">About CareerCraft</div>
+        <div class="section-subtitle">Career intelligence, not career guessing</div>
     </div>
     """, unsafe_allow_html=True)
     
-    # Filters
-    col1, col2 = st.columns(2)
-    with col1:
-        sort_by = st.selectbox("Sort by", ["Salary (high to low)", "Growth rate", "Alphabetical"])
-    with col2:
-        min_salary = st.selectbox("Minimum salary", ["Any", "$70k+", "$90k+", "$120k+"])
-    
-    # Sort careers
-    sorted_careers = CAREERS.copy()
-    if sort_by == "Salary (high to low)":
-        sorted_careers.sort(key=lambda x: x["median"], reverse=True)
-    elif sort_by == "Growth rate":
-        sorted_careers.sort(key=lambda x: x["growth"], reverse=True)
-    else:
-        sorted_careers.sort(key=lambda x: x["title"])
-    
-    # Filter
-    if min_salary == "$70k+":
-        sorted_careers = [c for c in sorted_careers if c["median"] >= 70000]
-    elif min_salary == "$90k+":
-        sorted_careers = [c for c in sorted_careers if c["median"] >= 90000]
-    elif min_salary == "$120k+":
-        sorted_careers = [c for c in sorted_careers if c["median"] >= 120000]
-    
-    for career in sorted_careers:
-        st.markdown(f"""
-        <div class="career-card">
-            <div class="career-header">
-                <div>
-                    <div class="career-title">{career['title']}</div>
-                    <div class="career-subtitle">{career['subtitle']}</div>
-                </div>
-                <div class="career-salary">
-                    <div class="career-salary-value">${career['median']:,}</div>
-                    <div class="career-salary-label">median salary</div>
-                </div>
-            </div>
-            <div class="card-body">{career['description']}</div>
-            <div class="career-stats">
-                <div class="career-stat">
-                    <div class="career-stat-value">{career['growth']}%</div>
-                    <div class="career-stat-label">Growth (10yr)</div>
-                </div>
-                <div class="career-stat">
-                    <div class="career-stat-value">{career['range']}</div>
-                    <div class="career-stat-label">Salary Range</div>
-                </div>
-                <div class="career-stat">
-                    <div class="career-stat-value">{career['education'].split()[0]}</div>
-                    <div class="career-stat-label">Education</div>
-                </div>
-            </div>
-            <div class="career-skills">
-                <div class="career-skills-label">Top Skills</div>
-                {"".join([f'<span class="pill pill-blue">{s}</span>' for s in career['top_skills'][:4]])}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown(f'<p class="footer-note">Salary data from {CAREERS[0]["source"]}</p>', unsafe_allow_html=True)
-
-# =============================================================================
-# SKILLS LAB PAGE
-# =============================================================================
-
-def render_skills():
     st.markdown("""
-    <div class="section-header">
-        <div class="section-title">Skills Lab</div>
-        <div class="section-subtitle">See the wage premium for each skill based on labor market data</div>
+    <div class="about-section">
+        <div class="about-body">
+            Most career advice is based on opinions, anecdotes, and gut feelings. We built CareerCraft because we believed career decisions deserve the same rigor as financial or medical decisions - grounded in data, transparent in methodology, and honest about uncertainty.
+        </div>
     </div>
     """, unsafe_allow_html=True)
     
     st.markdown("""
     <div class="card">
-        <div class="card-header">How skill premiums work</div>
-        <div class="card-body">
-            We calculate skill premiums using hedonic wage regression—the same methodology labor economists use.
-            By analyzing wage data across occupations that require each skill (from O*NET) against BLS salary data,
-            we isolate the marginal value each skill adds to your earning potential.
+        <div class="about-title">What makes us different</div>
+        
+        <div class="pitch-item">
+            <div class="pitch-num">1</div>
+            <div><strong>Enterprise-grade data.</strong> We integrate O*NET (1,016 occupations with 62,580 skill ratings), BLS wage data from 800+ occupations, JOLTS hiring records updated monthly, and Census educational outcomes by institution. No surveys. No self-reported data. The same verified labor market data used by Fortune 500 companies and research institutions.</div>
+        </div>
+        
+        <div class="pitch-item">
+            <div class="pitch-num">2</div>
+            <div><strong>Skill-level ROI.</strong> Everyone can tell you a CS degree has good ROI. We calculate the wage premium for individual skills: Python adds approximately $22,000 annually, project management adds $16,000, machine learning adds $35,000. You see exactly what to learn and what it's worth.</div>
+        </div>
+        
+        <div class="pitch-item">
+            <div class="pitch-num">3</div>
+            <div><strong>Research-backed methodology.</strong> Our matching uses hedonic wage regression (the same method labor economists use), causal inference for estimating treatment effects of career moves, and conformal prediction for honest uncertainty quantification. This isn't a personality quiz - it's the same quantitative rigor found in peer-reviewed academic research.</div>
+        </div>
+        
+        <div class="pitch-item">
+            <div class="pitch-num">4</div>
+            <div><strong>Transparent algorithms.</strong> Every recommendation includes explanations showing exactly why. No black boxes. If you want to see the math, you can. If you want to audit the logic, you can. We believe career decisions are too important for "trust us."</div>
+        </div>
+        
+        <div class="pitch-item">
+            <div class="pitch-num">5</div>
+            <div><strong>A community that gets it.</strong> Career transitions are hard. You're not just navigating job markets - you're navigating identity, family expectations, financial constraints, and fear of the unknown. Our community connects you with others at every stage, from students to seasoned reinventors, sharing real stories and real accountability.</div>
+        </div>
+        
+        <div class="pitch-item">
+            <div class="pitch-num">6</div>
+            <div><strong>Longitudinal tracking.</strong> Your profile persists and evolves. As you build skills, as markets shift, as your priorities change - your recommendations update. Version control lets you see how your trajectory evolves over time.</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    # Filter
-    category_filter = st.selectbox("Filter by category", ["All", "Technical", "Business", "Soft", "Design"])
-    
-    filtered_skills = SKILLS_DATA.items()
-    if category_filter != "All":
-        filtered_skills = [(k, v) for k, v in filtered_skills if v["category"] == category_filter]
-    
-    # Sort by premium
-    sorted_skills = sorted(filtered_skills, key=lambda x: x[1]["premium"], reverse=True)
-    
-    for skill_name, skill_data in sorted_skills:
-        st.markdown(f"""
-        <div class="skill-row">
-            <div class="skill-info">
-                <div class="skill-name">{skill_name}</div>
-                <div class="skill-category">{skill_data['category']} | Growth: {skill_data['growth']}</div>
-            </div>
-            <div class="skill-premium">
-                <div class="skill-premium-value">+${skill_data['premium']:,}</div>
-                <div class="skill-premium-label">annual premium</div>
-            </div>
-            <div class="skill-demand">
-                <div class="skill-demand-bar">
-                    <div class="skill-demand-fill" style="width: {skill_data['demand']}%"></div>
-                </div>
-                <div class="skill-demand-label">{skill_data['demand']}% demand</div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown('<p class="footer-note">Premiums calculated from O*NET skill ratings cross-referenced with BLS OEWS wage data</p>', unsafe_allow_html=True)
-
-# =============================================================================
-# MARKET PAGE
-# =============================================================================
-
-def render_market():
     st.markdown("""
-    <div class="section-header">
-        <div class="section-title">Market Pulse</div>
-        <div class="section-subtitle">Labor market trends from BLS JOLTS data</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div class="data-grid">
-        <div class="data-card">
-            <div class="data-value">11.2M</div>
-            <div class="data-label">Job Openings</div>
-        </div>
-        <div class="data-card">
-            <div class="data-value">3.7%</div>
-            <div class="data-label">Unemployment</div>
-        </div>
-        <div class="data-card">
-            <div class="data-value">+2.1%</div>
-            <div class="data-label">Wage Growth YoY</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown('<div class="card"><div class="card-header">Industry Outlook</div></div>', unsafe_allow_html=True)
-    
-    for industry, data in MARKET_DATA.items():
-        hiring_color = "#4A6741" if data["hiring"] in ["Strong", "Very Strong"] else "#d97706"
-        st.markdown(f"""
-        <div class="skill-row">
-            <div class="skill-info">
-                <div class="skill-name">{industry}</div>
-                <div class="skill-category">{data['openings']:,} openings | Avg ${data['avg_salary']:,}</div>
-            </div>
-            <div style="text-align: right;">
-                <div style="font-weight: 600; color: {hiring_color};">{data['hiring']}</div>
-                <div style="font-size: 0.75rem; color: #888;">{'+' if data['yoy_change'] > 0 else ''}{data['yoy_change']}% YoY</div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown('<p class="footer-note">Data from BLS JOLTS, updated monthly</p>', unsafe_allow_html=True)
-
-# =============================================================================
-# METHODOLOGY PAGE
-# =============================================================================
-
-def render_methodology():
-    st.markdown("""
-    <div class="section-header">
-        <div class="section-title">Our Methodology</div>
-        <div class="section-subtitle">The science behind CareerCraft recommendations</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div class="method-section">
-        <div class="method-title">Data Sources</div>
-        <div class="method-body">
-            CareerCraft integrates four major government datasets to ensure recommendations are grounded in verified labor market reality:
-        </div>
+    <div class="card">
+        <div class="about-title">Our data sources</div>
+        <div class="about-body">Every number in CareerCraft comes from a verified source:</div>
         <div class="data-grid">
             <div class="data-card">
                 <div class="data-value" style="font-size: 1.1rem;">O*NET 30.0</div>
@@ -1755,77 +1655,111 @@ def render_methodology():
     """, unsafe_allow_html=True)
     
     st.markdown("""
-    <div class="method-section">
-        <div class="method-title">Skill Premium Calculation</div>
-        <div class="method-body">
-            We calculate wage premiums for individual skills using hedonic wage regression, following the methodology established by Dey and Loewenstein. This isolates the marginal contribution of each skill to wages while controlling for occupation, education, and experience.
+    <div class="community-card">
+        <div class="community-title">Join the community</div>
+        <div class="community-body">
+            Career change is personal, but you don't have to do it alone. Our community connects students figuring out their first path, early-career professionals optimizing for growth, mid-career pivoters rediscovering purpose, and skilled immigrants navigating new markets. Share your wins, find accountability partners, get advice from people who've been where you are.
         </div>
-        <div class="formula-box">
-ln(wage) = α + Σβₖ(skill_k) + γX + ε
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="card">
+        <div class="about-title">The team</div>
+        <div class="about-body">
+            CareerCraft is built by AMARI Group. We're a small team obsessed with bringing quantitative rigor to decisions that have historically been made on intuition. We believe everyone deserves access to the same quality of career intelligence that elite universities and top consulting firms provide to a select few.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("Try CareerCheck", use_container_width=True):
+            st.session_state.page = "home"
+            st.session_state.step = "landing"
+            st.rerun()
 
-where:
-  skill_k = O*NET importance rating for skill k
-  X = control variables (education, experience, region)
-  βₖ = wage premium attributable to skill k
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div class="method-section">
-        <div class="method-title">Career Matching Algorithm</div>
-        <div class="method-body">
-            Career matches are calculated using a weighted distance function across seven dimensions. Each career has an ideal profile based on O*NET work context ratings. Your assessment responses are compared against these profiles to generate match percentages.
-        </div>
-        <div class="formula-box">
-match_score = 100 - (Σ|user_d - career_d| / max_diff) × 100
+# =============================================================================
+# USE CASES PAGE - 4 Research-backed Personas
+# =============================================================================
 
-where:
-  user_d = user's score on dimension d
-  career_d = career's ideal score on dimension d
-  max_diff = maximum possible total difference
-        </div>
+def render_usecases():
+    st.markdown("""
+    <div class="section-header">
+        <div class="section-title">Who CareerCraft is for</div>
+        <div class="section-subtitle">Real people with real career questions</div>
     </div>
     """, unsafe_allow_html=True)
     
     st.markdown("""
-    <div class="method-section">
-        <div class="method-title">Uncertainty Quantification</div>
-        <div class="method-body">
-            We use conformal prediction (Romano et al., 2019) to provide calibrated uncertainty intervals on salary projections and career trajectory forecasts. This ensures we communicate confidence appropriately rather than providing false precision.
-        </div>
+    <div class="about-body" style="text-align: center; max-width: 560px; margin: 0 auto 2rem;">
+        Career transitions are deeply personal. Our research identified four distinct segments - each with different needs, constraints, and definitions of success. Maybe you'll see yourself in one of them.
     </div>
     """, unsafe_allow_html=True)
+    
+    for persona in PERSONAS:
+        # Build constraints HTML
+        constraints_html = "".join([f'<div class="persona-constraint">{c}</div>' for c in persona["constraints"]])
+        
+        # Build stats HTML
+        stats_html = "".join([f'<span class="persona-stat">{s}</span>' for s in persona["stats"]])
+        
+        st.markdown(f"""
+        <div class="persona-card">
+            <div class="persona-header">
+                <div>
+                    <div class="persona-name">{persona['name']}</div>
+                    <div class="persona-archetype">{persona['archetype']}</div>
+                </div>
+                <div class="persona-meta">
+                    <div class="persona-age">Age {persona['age']}</div>
+                    <div class="persona-stage">{persona['stage']}</div>
+                </div>
+            </div>
+            
+            <div class="persona-story">{persona['story']}</div>
+            
+            <div class="persona-tension">
+                <div class="persona-tension-label">Current Tension</div>
+                <div class="persona-tension-text">{persona['tension']}</div>
+            </div>
+            
+            <div class="persona-section-label">Key Constraints</div>
+            <div class="persona-constraints">{constraints_html}</div>
+            
+            <div class="persona-jtbd">
+                <div class="persona-jtbd-label">What they need</div>
+                <div class="persona-jtbd-text">{persona['jtbd']}</div>
+            </div>
+            
+            <div class="persona-message">
+                <div class="persona-message-label">Message that resonates</div>
+                <div class="persona-message-text">"{persona['resonant_message']}"</div>
+            </div>
+            
+            <div class="persona-stats">{stats_html}</div>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.markdown("""
-    <div class="method-section">
-        <div class="method-title">Causal Inference</div>
-        <div class="method-body">
-            When estimating the effect of interventions (education, certifications, job changes), we apply causal forest methodology (Athey & Wager, 2019) to estimate heterogeneous treatment effects. This allows us to personalize ROI estimates rather than relying on population averages.
-        </div>
+    <div class="card" style="text-align: center; background: linear-gradient(135deg, #f5faf4 0%, #f0f7ff 100%); margin-top: 1.5rem;">
+        <div class="card-header">See yourself here?</div>
+        <div class="card-body">Take CareerCheck and get clarity on your own situation. Join a community of people navigating similar challenges.</div>
     </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("""
-    <div class="card" style="background: #f8f8f6;">
-        <div class="card-header">Academic References</div>
-        <div class="card-body" style="font-size: 0.85rem; line-height: 1.7;">
-            Athey, S., & Wager, S. (2019). Estimating treatment effects with causal forests. <em>Journal of the American Statistical Association.</em><br><br>
-            Dey, M., & Loewenstein, M. (2020). How many workers are employed in sectors directly affected by COVID-19 shutdowns? <em>Monthly Labor Review, BLS.</em><br><br>
-            Romano, Y., Patterson, E., & Candès, E. (2019). Conformalized quantile regression. <em>NeurIPS.</em><br><br>
-            Hamilton, W. L., Ying, R., & Leskovec, J. (2017). Inductive representation learning on large graphs. <em>NeurIPS.</em>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown('<p class="footer-note">Full methodology documentation available for academic partners</p>', unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("Start CareerCheck", use_container_width=True, key="usecase_cta"):
+            st.session_state.page = "home"
+            st.session_state.step = "landing"
+            st.rerun()
 
 # =============================================================================
 # MAIN
 # =============================================================================
 
 def main():
-    # Check for signup modal first
     if st.session_state.get("show_signup", False):
         render_nav()
         render_signup()
@@ -1833,18 +1767,14 @@ def main():
     
     render_nav()
     
-    page = st.session_state.get("page", "careercheck")
+    page = st.session_state.get("page", "home")
     
-    if page == "careercheck":
-        render_careercheck()
-    elif page == "careers":
-        render_careers()
-    elif page == "skills":
-        render_skills()
-    elif page == "market":
-        render_market()
-    elif page == "methodology":
-        render_methodology()
+    if page == "home":
+        render_home()
+    elif page == "about":
+        render_about()
+    elif page == "usecases":
+        render_usecases()
 
 if __name__ == "__main__":
     main()
