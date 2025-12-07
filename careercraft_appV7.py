@@ -148,17 +148,17 @@ PERSONAS = [
         "archetype": "The Anxious Explorer",
         "age": "19-22",
         "stage": "Student / Recent Grad",
-        "story": "Maya started university during peak pandemic uncertainty, choosing business as a 'safe' major before realizing it doesn't excite her. She's cycled through interests - psychology, UX design, marketing - without committing. Graduation approaches in 14 months and she feels paralyzed by options, terrified of 'wasting' her degree.",
+        "story": "Maya started uni during peak pandemic uncertainty, choosing business as a 'safe' major before realising it doesn't excite her. She's cycled through interests - psychology, design, marketing - without committing. Graduation approaches in 14 months and she feels paralysed by options, terrified of 'wasting' her degree.",
         "tension": "Stuck between too many options. Wants something meaningful but fears picking wrong and disappointing her family.",
         "constraints": [
-            "$38K student debt creates pressure to find ROI on education",
-            "Parents' expectations limit perceived 'creative' options",
-            "Mental health challenges (anxiety) affect follow-through",
-            "Limited professional network beyond professors"
+            "Pressure from family to get a 'stable' job quickly",
+            "Anxiety makes it hard to commit to one direction",
+            "Everyone seems to have it figured out except her",
+            "Limited work experience beyond casual jobs"
         ],
-        "jtbd": "When I'm lying awake worrying about graduation, I want to understand what realistic career paths match my skills and interests, so I can stop feeling paralyzed and start taking action.",
+        "need": "When I'm lying awake worrying about graduation, I want to understand what realistic career paths match my skills and interests, so I can stop feeling paralysed and start taking action.",
         "resonant_message": "Stop spiraling through Reddit threads at 2am. Get a plan you can actually follow.",
-        "stats": ["42% of Gen Z have a mental health diagnosis", "75% change their major at least once", "67% need help with career decisions"]
+        "stats": ["42% of young people report mental health challenges", "75% change their major at least once", "67% need help with career decisions"]
     },
     {
         "id": "darius",
@@ -166,17 +166,17 @@ PERSONAS = [
         "archetype": "The Ambitious Climber",
         "age": "26-30",
         "stage": "Early Career (3-5 years)",
-        "story": "Darius excelled academically and landed a solid corporate job after graduation. He's been promoted once and is earning $85K, but watches peers at other companies pull $120K+. He and his partner want to buy property within 2-3 years, requiring significant salary growth or a strategic move.",
-        "tension": "Knows he needs to either push for promotion, jump to a competitor, or shift to a higher-ceiling field. Each path has trade-offs he can't fully evaluate.",
+        "story": "Darius excelled academically and landed a solid corporate job after graduation. He's been promoted once and is earning $85K, but watches peers at other companies earning $120K+. He and his partner want to break into the property market within 2-3 years, which means significant salary growth or a strategic career move.",
+        "tension": "Knows he needs to either push for promotion, jump to a competitor, or shift to a higher-paying field. Each path has trade-offs he can't fully evaluate.",
         "constraints": [
-            "$42K remaining student debt",
-            "Partner's career limits geographic flexibility",
-            "Golden handcuffs from unvested RSUs",
-            "Doesn't want to restart at entry level in new field"
+            "Property prices keep rising faster than his savings",
+            "Partner's job limits where they can move",
+            "Bonus and shares tied to staying at current company",
+            "Doesn't want to start from the bottom in a new field"
         ],
-        "jtbd": "When I see peers getting promoted or jumping to better roles, I want to understand exactly what moves will maximize my earnings over the next 5 years, so I can hit my financial goals.",
-        "resonant_message": "Model your next 5 years. Compare paths. Optimize for what actually matters to you.",
-        "stats": ["56% live paycheck-to-paycheck", "Job tenure dropped to 3.2 years", "86% say purpose matters for satisfaction"]
+        "need": "When I see peers getting promoted or jumping to better roles, I want to understand exactly what moves will grow my income over the next 5 years, so I can finally get into the property market.",
+        "resonant_message": "Model your next 5 years. Compare paths. Optimise for what actually matters to you.",
+        "stats": ["Median house price is 8x average income", "Average job tenure is now 3.2 years", "86% say purpose matters for job satisfaction"]
     },
     {
         "id": "rachel",
@@ -184,35 +184,35 @@ PERSONAS = [
         "archetype": "The Burned-Out Reinventor",
         "age": "36-44",
         "stage": "Mid-Career (12-18 years)",
-        "story": "Rachel built a respectable career in corporate marketing, reaching Director level by her late 30s. COVID's remote work revelation showed her that work-life balance was possible - then return-to-office mandates and layoffs brought burnout to a breaking point. She recently turned down a promotion because it meant more travel and stress.",
-        "tension": "Wants out of the corporate grind but can't afford to start over at entry level. Explored coaching, therapy, even counseling school - but each path requires sacrificing either income or years of career capital.",
+        "story": "Rachel built a respectable career in corporate marketing, reaching Director level by her late 30s. COVID's remote work era showed her that work-life balance was possible - then return-to-office mandates and restructures brought burnout to a breaking point. She recently turned down a promotion because it meant more travel and stress.",
+        "tension": "Wants out of the corporate grind but can't afford to start over at entry level. Explored coaching, therapy, even counselling - but each path requires sacrificing either income or years of experience.",
         "constraints": [
-            "Mortgage and family create $90K minimum income floor",
-            "Healthcare dependent on employment",
-            "Age discrimination concerns",
-            "Two school-age children limit time for retraining"
+            "Mortgage and family mean she needs at least $90K",
+            "Worried about age discrimination in job hunting",
+            "Two school-age kids limit time for retraining",
+            "Exhausted from current job with no energy for job searching"
         ],
-        "jtbd": "When I wake up dreading Monday again, I want to find a realistic path to work that's sustainable and meaningful, so I can stop feeling trapped and show my kids it's possible to love what you do.",
+        "need": "When I wake up dreading Monday again, I want to find a realistic path to work that's sustainable and meaningful, so I can stop feeling trapped and show my kids it's possible to love what you do.",
         "resonant_message": "You've built skills. Let's figure out where they're valued - without starting over.",
-        "stats": ["Average career changer is 39", "43% say 'too late' holds them back", "35% cite burnout as top concern"]
+        "stats": ["Average career changer is 39 years old", "43% feel it's 'too late' to change", "35% cite burnout as their top concern"]
     },
     {
         "id": "emmanuel",
         "name": "Emmanuel",
-        "archetype": "The First-Gen Navigator",
+        "archetype": "The New Australian",
         "age": "28-34",
         "stage": "Skilled Professional (5-10 years)",
-        "story": "Emmanuel immigrated six years ago with an accounting degree and three years of professional experience. Credential recognition took longer than expected. He worked as a rideshare driver, then warehouse supervisor, while studying for CPA equivalency. He's now a junior accountant earning 40% less than domestic peers.",
-        "tension": "Feels trapped between stability of current path (continue toward CPA, hope for promotion) and opportunity cost of not pivoting to tech or higher-growth fields while still young enough to learn.",
+        "story": "Emmanuel moved to Australia six years ago with an accounting degree and three years of professional experience. Getting his qualifications recognised took longer than expected. He worked as a rideshare driver, then warehouse supervisor, while completing local certification. He's now a junior accountant earning 40% less than Australian-trained peers.",
+        "tension": "Feels stuck between the safety of his current path and the fear of missing out on higher-growth fields while he's still young enough to pivot.",
         "constraints": [
-            "Immigration status limits job flexibility",
-            "Sends $500/month to parents back home",
-            "Credential recognition barriers devalue qualifications",
-            "Limited domestic professional network"
+            "Visa conditions limit job flexibility",
+            "Sends money to family back home each month",
+            "Australian employers undervalue overseas experience",
+            "Small professional network in Australia"
         ],
-        "jtbd": "When I see domestic peers advancing faster despite less experience, I want to understand what credentials, skills, and strategies will accelerate my career given my specific constraints.",
+        "need": "When I see Australian-trained peers advancing faster despite less experience, I want to understand what qualifications, skills, and strategies will accelerate my career here.",
         "resonant_message": "Your skills traveled with you. Let's make sure employers see them.",
-        "stats": ["First-gen earn $36K less median", "17% of self-employed are migrants", "1/3 lack foundational digital skills"]
+        "stats": ["Migrants earn 25% less on average", "17% of Australian business owners are migrants", "Recognition of overseas qualifications takes 2+ years"]
     },
 ]
 
@@ -1008,6 +1008,43 @@ st.markdown("""
         margin-top: 0.5rem;
         font-style: italic;
     }
+    
+    /* Dots indicator for Typeform-style navigation */
+    .dots-container {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+    }
+    
+    .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #d1d1d1;
+        transition: all 0.3s ease;
+    }
+    
+    .dot.active {
+        background: #4A6741;
+        transform: scale(1.2);
+    }
+    
+    /* Slide animation for persona cards */
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    .persona-card {
+        animation: slideIn 0.4s ease-out;
+    }
 </style>
 <script>
     // Scroll animation observer
@@ -1738,26 +1775,28 @@ def render_about():
 # =============================================================================
 
 def render_usecases():
-    st.markdown('''
-    <div class="section-header">
-        <div class="section-title">Who CareerCraft is for</div>
-        <div class="section-subtitle">Real people with real career questions</div>
+    # Initialize persona index in session state
+    if "persona_idx" not in st.session_state:
+        st.session_state.persona_idx = 0
+    
+    idx = st.session_state.persona_idx
+    total = len(PERSONAS)
+    persona = PERSONAS[idx]
+    
+    # Progress indicator
+    progress_pct = int(((idx + 1) / total) * 100)
+    st.markdown(f'''
+    <div class="progress-container">
+        <div class="progress-text">Story {idx + 1} of {total}</div>
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: {progress_pct}%"></div>
+        </div>
     </div>
     ''', unsafe_allow_html=True)
     
-    st.markdown('''
-    <div class="about-body" style="text-align: center; max-width: 560px; margin: 0 auto 2rem;">
-        Career transitions are deeply personal. Our research identified four distinct segments - each with different needs, constraints, and definitions of success. Maybe you\'ll see yourself in one of them.
-    </div>
-    ''', unsafe_allow_html=True)
-    
-    # Render each persona separately for proper display
-    for i, persona in enumerate(PERSONAS):
-        # Card container with scroll animation
-        st.markdown(f'<div class="persona-card scroll-fade" style="animation-delay: {i * 0.15}s;">', unsafe_allow_html=True)
-        
-        # Header
-        st.markdown(f'''
+    # Persona card with animation
+    st.markdown(f'''
+    <div class="persona-card scroll-fade visible" style="animation: slideIn 0.4s ease-out;">
         <div class="persona-header">
             <div>
                 <div class="persona-name">{persona['name']}</div>
@@ -1768,62 +1807,92 @@ def render_usecases():
                 <div class="persona-stage">{persona['stage']}</div>
             </div>
         </div>
-        ''', unsafe_allow_html=True)
-        
-        # Story
-        st.markdown(f'<div class="persona-story">{persona["story"]}</div>', unsafe_allow_html=True)
-        
-        # Tension box
-        st.markdown(f'''
-        <div class="persona-tension">
-            <div class="persona-tension-label">Current Tension</div>
-            <div class="persona-tension-text">{persona['tension']}</div>
-        </div>
-        ''', unsafe_allow_html=True)
-        
-        # Constraints
-        st.markdown('<div class="persona-section-label">Key Constraints</div>', unsafe_allow_html=True)
-        for constraint in persona["constraints"]:
-            st.markdown(f'<div class="persona-constraint">{constraint}</div>', unsafe_allow_html=True)
-        
-        # JTBD box
-        st.markdown(f'''
-        <div class="persona-jtbd">
-            <div class="persona-jtbd-label">What they need</div>
-            <div class="persona-jtbd-text">{persona['jtbd']}</div>
-        </div>
-        ''', unsafe_allow_html=True)
-        
-        # Resonant message
-        st.markdown(f'''
-        <div class="persona-message">
-            <div class="persona-message-label">Message that resonates</div>
-            <div class="persona-message-text">{persona['resonant_message']}</div>
-        </div>
-        ''', unsafe_allow_html=True)
-        
-        # Stats
-        st.markdown('<div class="persona-stats">', unsafe_allow_html=True)
-        for stat in persona["stats"]:
-            st.markdown(f'<span class="persona-stat">{stat}</span>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        # Close card
-        st.markdown('</div>', unsafe_allow_html=True)
-    
-    # CTA
-    st.markdown('''
-    <div class="cta-card scroll-fade">
-        <div class="cta-title">See yourself here?</div>
-        <div class="cta-body">Take CareerCheck and get clarity on your own situation. Join a community of people navigating similar challenges.</div>
     </div>
     ''', unsafe_allow_html=True)
     
+    # Story
+    st.markdown(f'<div class="persona-story">{persona["story"]}</div>', unsafe_allow_html=True)
+    
+    # Tension box
+    st.markdown(f'''
+    <div class="persona-tension">
+        <div class="persona-tension-label">The Challenge</div>
+        <div class="persona-tension-text">{persona['tension']}</div>
+    </div>
+    ''', unsafe_allow_html=True)
+    
+    # Constraints
+    st.markdown('<div class="persona-section-label">What\'s Holding Them Back</div>', unsafe_allow_html=True)
+    for constraint in persona["constraints"]:
+        st.markdown(f'<div class="persona-constraint">{constraint}</div>', unsafe_allow_html=True)
+    
+    # What they need (was JTBD)
+    st.markdown(f'''
+    <div class="persona-jtbd">
+        <div class="persona-jtbd-label">What They Need</div>
+        <div class="persona-jtbd-text">{persona['need']}</div>
+    </div>
+    ''', unsafe_allow_html=True)
+    
+    # Resonant message
+    st.markdown(f'''
+    <div class="persona-message">
+        <div class="persona-message-label">Message That Resonates</div>
+        <div class="persona-message-text">{persona['resonant_message']}</div>
+    </div>
+    ''', unsafe_allow_html=True)
+    
+    # Stats
+    st.markdown('<div class="persona-stats">', unsafe_allow_html=True)
+    for stat in persona["stats"]:
+        st.markdown(f'<span class="persona-stat">{stat}</span>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Navigation buttons
+    st.markdown("<br>", unsafe_allow_html=True)
+    
     col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        if st.button("Start CareerCheck", use_container_width=True, key="usecase_cta"):
-            navigate_to("home", "landing")
-            st.rerun()
+    
+    with col1:
+        if idx > 0:
+            if st.button("Back", type="secondary", use_container_width=True, key="persona_back"):
+                st.session_state.persona_idx -= 1
+                st.rerun()
+        else:
+            if st.button("Home", type="secondary", use_container_width=True, key="persona_home"):
+                navigate_to("home", "landing")
+                st.rerun()
+    
+    with col3:
+        if idx < total - 1:
+            if st.button("Next", use_container_width=True, key="persona_next"):
+                st.session_state.persona_idx += 1
+                st.rerun()
+        else:
+            if st.button("Get Started", use_container_width=True, key="persona_start"):
+                navigate_to("home", "landing")
+                st.rerun()
+    
+    # Dots indicator
+    dots_html = ""
+    for i in range(total):
+        active = "active" if i == idx else ""
+        dots_html += f'<span class="dot {active}"></span>'
+    
+    st.markdown(f'''
+    <div class="dots-container">
+        {dots_html}
+    </div>
+    ''', unsafe_allow_html=True)
+    
+    # See yourself prompt
+    if idx == total - 1:
+        st.markdown('''
+        <div class="cta-card" style="margin-top: 1.5rem;">
+            <div class="cta-title">See yourself in any of these stories?</div>
+            <div class="cta-body">Take CareerCheck and get clarity on your own situation.</div>
+        </div>
+        ''', unsafe_allow_html=True)
 
 # =============================================================================
 # MAIN
